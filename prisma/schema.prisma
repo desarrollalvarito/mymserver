@@ -1,0 +1,148 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int     @id @default(autoincrement())
+  username String  @unique(map: "username") @db.VarChar(255)
+  email    String? @unique(map: "email") @db.VarChar(255)
+  password String  @db.VarChar(255)
+  person   Person? @relation(fields: [personId], references: [id])
+  personId Int?    @unique
+}
+
+model Person {
+  id        Int       @id @default(autoincrement())
+  run       String?   @unique(map: "run") @db.VarChar(50)
+  names     String    @db.VarChar(50)
+  lastName  String?   @db.VarChar(50)
+  gender    String?   @db.Char(1)
+  address   Json?     @db.Json
+  contact   Json?     @db.Json
+  birthdate DateTime? @db.Date
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  user      User?
+  client    Client?
+  employee  Employee?
+}
+
+model Client {
+  id              Int     @id @default(autoincrement())
+  shippingAddress Json    @db.Json
+  billName        String? @db.VarChar(100)
+  rut             String? @db.VarChar(100)
+  person          Person? @relation(fields: [personId], references: [id])
+  personId        Int?    @unique
+  order           Order?
+}
+
+model Employee {
+  id        Int     @id @default(autoincrement())
+  jobRole   String  @db.VarChar(50)
+  workShift String  @db.VarChar(50)
+  person    Person? @relation(fields: [personId], references: [id])
+  personId  Int?    @unique
+}
+
+model Subsidiary {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(50)
+  description String   @db.VarChar(150)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userAt      Int      @db.Int
+}
+
+model Sale {
+  id          Int           @id @default(autoincrement())
+  totalAmount Decimal       @db.Decimal()
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  userAt      Int           @db.Int
+  products    SaleProduct[]
+}
+
+model Product {
+  id        Int           @id @default(autoincrement())
+  name      String        @db.VarChar(50)
+  price     Decimal       @db.Decimal()
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  userAt    Int           @db.Int
+  sales     SaleProduct[]
+  stock     Stock?
+}
+
+model SaleProduct {
+  product       Product  @relation(fields: [productId], references: [id])
+  productId     Int
+  sale          Sale     @relation(fields: [saleId], references: [id])
+  saleId        Int
+  partialAmount Decimal  @db.Decimal()
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  userAt        Int      @db.Int
+
+  @@id([productId, saleId])
+}
+
+model Stock {
+  id            Int      @id @default(autoincrement())
+  initialAmount Int      @db.Int
+  currentAmount Int      @db.Int
+  date          DateTime @db.Date
+  product       Product  @relation(fields: [productId], references: [id])
+  productId     Int      @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  userAt        Int      @db.Int
+}
+
+model Order {
+  id        Int      @id @default(autoincrement())
+  client    Client   @relation(fields: [clientId], references: [id])
+  clientId  Int      @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userAt    Int      @db.Int
+}
+
+model Role {
+  id Int @id @default(autoincrement())
+}
+
+model Supply {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userAt    Int      @db.Int
+}
+
+model DailyQuota {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userAt    Int      @db.Int
+}
+
+model DataSettings {
+  id         Int      @id @default(autoincrement())
+  table      String   @db.VarChar(50)
+  field      String   @db.VarChar(50)
+  properties Json     @db.Json
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  userAt     Int      @db.Int
+}
