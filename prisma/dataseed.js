@@ -34,3 +34,36 @@ export const employees = [
         personId: 2
     }
 ]
+
+export const products = [
+    {
+        name: 'empanada de pino',
+        price: 1000,
+        userAt: 1
+    },
+    {
+        name: 'empanada picante',
+        price: 1200,
+        userAt: 1
+    },
+    {
+        name: 'empanada de queso',
+        price: 1500,
+        userAt: 1
+    },
+    {
+        name: 'empanada de pollo',
+        price: 1000,
+        userAt: 1
+    },
+    {
+        name: 'empanada de mariscos',
+        price: 2000,
+        userAt: 1
+    },
+    {
+        name: 'empanada de choclo',
+        price: 1300,
+        userAt: 1
+    },
+]

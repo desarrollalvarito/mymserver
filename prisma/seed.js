@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { users, people, employees } from './dataseed.js'
+import { users, people, employees, products } from './dataseed.js'
 const prisma = new PrismaClient()
 
 async function main() {
@@ -40,6 +40,17 @@ async function main() {
                 workShift,
                 personId
             },
+        })
+    })
+
+    products.forEach(async p => {
+        const { name, price, userAt } = p
+        await prisma.product.create({
+            data: {
+                name,
+                price,
+                userAt
+            }
         })
     })
 }
