@@ -2,36 +2,36 @@ import { prisma } from '../config/db.js'
 import { body } from 'express-validator'
 import { generateToken } from '../helpers/tokenManager.js'
 
-export const listProduct = async (req, res) => {
+export const listClient = async (req, res) => {
     try {
-        let products = await prisma.product.findMany()
-        return res.send(products)
+        let clients = await prisma.client.findMany()
+        return res.send(clients)
     } catch (error) {
         return res.json({ error })
     }
 }
 
-export const createProduct = async (req, res) => {
+export const createClient = async (req, res) => {
     const { name, price, userAt } = req.body
     try {
-        let product = await prisma.product.create(
+        let client = await prisma.client.create(
             {
                 data: {
                     name,
                     price,
-                    userAt
+                    userAt: 1
                 }
             }
         )
-        return res.send(product)
+        return res.send(client)
     } catch (error) {
         return res.json({ error })
     }
 }
-export const updateProduct = async (req, res) => {
+export const updateClient = async (req, res) => {
     const { id, name, price, userAt } = req.body
     try {
-        let product = await prisma.product.update(
+        let client = await prisma.client.update(
             {
                 where: {
                     id
@@ -39,26 +39,26 @@ export const updateProduct = async (req, res) => {
                 data: {
                     name,
                     price,
-                    userAt
+                    userAt: 1
                 }
             }
         )
-        return res.send(product)
+        return res.send(client)
     } catch (error) {
         return res.json({ error })
     }
 }
-export const deleteProduct = async (req, res) => {
+export const deleteClient = async (req, res) => {
     const { id } = req.body
     try {
-        let product = await prisma.product.delete(
+        let client = await prisma.client.delete(
             {
                 where: {
                     id
                 }
             }
         )
-        return res.send(products)
+        return res.send(clients)
     } catch (error) {
         return res.json({ error })
     }

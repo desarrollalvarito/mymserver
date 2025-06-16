@@ -15,7 +15,6 @@ export const login = async (req, res) => {
     const { username, password } = req.body
     try {
         let data = await prisma.user.login(username, password)
-        console.log(data);
         if (!data.login) {
             return res.status(403).json({ login: false, error: 'credentials not valid' })
         }
