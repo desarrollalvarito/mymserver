@@ -2,7 +2,7 @@ import { prisma } from '../config/db.js'
 import { body } from 'express-validator'
 import { generateToken } from '../helpers/tokenManager.js'
 
-export const listProduct = async (req, res) => {
+export const list = async (req, res) => {
     try {
         let products = await prisma.product.findMany()
         return res.send(products)
@@ -11,7 +11,7 @@ export const listProduct = async (req, res) => {
     }
 }
 
-export const createProduct = async (req, res) => {
+export const add = async (req, res) => {
     const { name, price, userAt } = req.body
     try {
         let product = await prisma.product.create(
@@ -28,7 +28,7 @@ export const createProduct = async (req, res) => {
         return res.json({ error })
     }
 }
-export const updateProduct = async (req, res) => {
+export const modify = async (req, res) => {
     const { id, name, price, userAt } = req.body
     try {
         let product = await prisma.product.update(
@@ -48,7 +48,7 @@ export const updateProduct = async (req, res) => {
         return res.json({ error })
     }
 }
-export const deleteProduct = async (req, res) => {
+export const remove = async (req, res) => {
     const { id } = req.body
     try {
         let product = await prisma.product.delete(
@@ -58,7 +58,7 @@ export const deleteProduct = async (req, res) => {
                 }
             }
         )
-        return res.send(products)
+        return res.send(product)
     } catch (error) {
         return res.json({ error })
     }

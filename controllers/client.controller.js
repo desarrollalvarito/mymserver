@@ -2,7 +2,7 @@ import { prisma } from '../config/db.js'
 import { body } from 'express-validator'
 import { generateToken } from '../helpers/tokenManager.js'
 
-export const listClient = async (req, res) => {
+export const list = async (req, res) => {
     try {
         let clients = await prisma.client.findMany()
         return res.send(clients)
@@ -11,7 +11,7 @@ export const listClient = async (req, res) => {
     }
 }
 
-export const createClient = async (req, res) => {
+export const add = async (req, res) => {
     const { shippingAddress, billName, rut, personId } = req.body
     try {
         let client = await prisma.client.create(
@@ -29,7 +29,7 @@ export const createClient = async (req, res) => {
         return res.json({ error })
     }
 }
-export const updateClient = async (req, res) => {
+export const modify = async (req, res) => {
     const { id, shippingAddress, billName, rut, personId } = req.body
     try {
         let client = await prisma.client.update(
@@ -50,7 +50,7 @@ export const updateClient = async (req, res) => {
         return res.json({ error })
     }
 }
-export const deleteClient = async (req, res) => {
+export const remove = async (req, res) => {
     const { id } = req.body
     try {
         let client = await prisma.client.delete(
@@ -60,7 +60,7 @@ export const deleteClient = async (req, res) => {
                 }
             }
         )
-        return res.send(clients)
+        return res.send(client)
     } catch (error) {
         return res.json({ error })
     }

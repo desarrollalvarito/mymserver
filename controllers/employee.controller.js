@@ -1,7 +1,7 @@
 import { prisma } from '../config/db.js'
 import { body } from 'express-validator'
 
-export const get = async (req, res) => {
+export const list = async (req, res) => {
     try {
         let employees = await prisma.employee.findMany({
             include: {
@@ -14,19 +14,53 @@ export const get = async (req, res) => {
     }
 }
 
-export const create = async (req, res) => {
+export const add = async (req, res) => {
     try {
-        const { username, email, password, personId } = req.body
+        const { jobRole, workShift, personId } = req.body
         console.log(req.body);
-        let user = await prisma.user.create({
+        let employee = await prisma.employee.create({
             data: {
-                username,
-                email,
-                password,
+                jobRole,
+                workShift,
                 personId
             }
         })
-        return res.json({ ok: true })
+        return res.send(employee)
+    } catch (error) {
+        return res.json({ ok: false, error })
+    }
+}
+
+export const modify = async (req, res) => {
+    try {
+        const { id, jobRole, workShift, personId } = req.body
+        console.log(req.body);
+        let employee = await prisma.employee.update({
+            where: {
+                id
+            },
+            data: {
+                jobRole,
+                workShift,
+                personId
+            }
+        })
+        return res.send(employee)
+    } catch (error) {
+        return res.json({ ok: false, error })
+    }
+}
+
+export const remove = async (req, res) => {
+    try {
+        const { id } = req.body
+        console.log(req.body);
+        let employee = await prisma.employee.remove({
+            where: {
+                id
+            }
+        })
+        return res.send(employee)
     } catch (error) {
         return res.json({ ok: false, error })
     }

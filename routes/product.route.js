@@ -1,13 +1,13 @@
 import { Router } from "express";
-import { listProduct, createProduct, updateProduct, deleteProduct } from "../controllers/product.controller.js";
+import { list, add, modify, remove } from "../controllers/product.controller.js";
 import { validationResultExpress } from "../middlewares/validationResult.js";
 import { validateToken } from "../middlewares/validateToken.js";
 
 const router = Router()
 
-router.get('/list', listProduct)
-router.post('/create', createProduct)
-router.put('/update', updateProduct)
-router.delete('/delete', deleteProduct)
+router.get('/list', list)
+router.post('/add', add)
+router.put('/modify', modify)
+router.delete('/remove', remove)
 
 export default router
