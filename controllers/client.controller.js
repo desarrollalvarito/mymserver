@@ -12,14 +12,15 @@ export const listClient = async (req, res) => {
 }
 
 export const createClient = async (req, res) => {
-    const { name, price, userAt } = req.body
+    const { shippingAddress, billName, rut, personId } = req.body
     try {
         let client = await prisma.client.create(
             {
                 data: {
-                    name,
-                    price,
-                    userAt: 1
+                    shippingAddress,
+                    billName,
+                    rut,
+                    personId
                 }
             }
         )
@@ -29,7 +30,7 @@ export const createClient = async (req, res) => {
     }
 }
 export const updateClient = async (req, res) => {
-    const { id, name, price, userAt } = req.body
+    const { id, shippingAddress, billName, rut, personId } = req.body
     try {
         let client = await prisma.client.update(
             {
@@ -37,9 +38,10 @@ export const updateClient = async (req, res) => {
                     id
                 },
                 data: {
-                    name,
-                    price,
-                    userAt: 1
+                    shippingAddress,
+                    billName,
+                    rut,
+                    personId
                 }
             }
         )

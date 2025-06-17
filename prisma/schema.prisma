@@ -28,8 +28,8 @@ model Person {
   names     String    @db.VarChar(50)
   lastName  String?   @db.VarChar(50)
   gender    String?   @db.Char(1)
-  address   Json?     @db.Json
-  contact   Json?     @db.Json
+  address   String?    @db.VarChar(150)
+  contact   String?    @db.VarChar(50)
   birthdate DateTime? @db.Date
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -40,12 +40,12 @@ model Person {
 
 model Client {
   id              Int     @id @default(autoincrement())
-  shippingAddress Json    @db.Json
-  billName        String? @db.VarChar(100)
-  rut             String? @db.VarChar(100)
+  shippingAddress String  @db.VarChar(150)
+  billName        String  @db.VarChar(100)
+  rut             String  @db.VarChar(100)
   person          Person? @relation(fields: [personId], references: [id])
   personId        Int?    @unique
-  order           Order?
+  order           Order[]
 }
 
 model Employee {
@@ -82,6 +82,7 @@ model Product {
   updatedAt DateTime      @updatedAt
   userAt    Int           @db.Int
   sales     SaleProduct[]
+  order     Order[]
   stock     Stock?
 }
 
@@ -90,6 +91,7 @@ model SaleProduct {
   productId     Int
   sale          Sale     @relation(fields: [saleId], references: [id])
   saleId        Int
+  quantity      Int
   partialAmount Decimal  @db.Decimal()
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -114,6 +116,8 @@ model Order {
   id        Int      @id @default(autoincrement())
   client    Client   @relation(fields: [clientId], references: [id])
   clientId  Int      @unique
+  product   Product  @relation(fields: [productId], references: [id])
+  productId Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   userAt    Int      @db.Int
