@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -18,8 +12,8 @@ model User {
   username String  @unique(map: "username") @db.VarChar(255)
   email    String? @unique(map: "email") @db.VarChar(255)
   password String  @db.VarChar(255)
-  person   Person? @relation(fields: [personId], references: [id])
   personId Int?    @unique
+  person   Person? @relation(fields: [personId], references: [id])
 }
 
 model Person {
@@ -28,32 +22,32 @@ model Person {
   names     String    @db.VarChar(50)
   lastName  String?   @db.VarChar(50)
   gender    String?   @db.Char(1)
-  address   String?    @db.VarChar(150)
-  contact   String?    @db.VarChar(50)
+  address   String?   @db.LongText
+  contact   String?   @db.LongText
   birthdate DateTime? @db.Date
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-  user      User?
   client    Client?
   employee  Employee?
+  user      User?
 }
 
 model Client {
   id              Int     @id @default(autoincrement())
-  shippingAddress String  @db.VarChar(150)
-  billName        String  @db.VarChar(100)
-  rut             String  @db.VarChar(100)
-  person          Person? @relation(fields: [personId], references: [id])
+  shippingAddress String  @db.LongText
+  billName        String? @db.VarChar(100)
+  rut             String? @db.VarChar(100)
   personId        Int?    @unique
-  order           Order[]
+  person          Person? @relation(fields: [personId], references: [id])
+  order           Order?
 }
 
 model Employee {
   id        Int     @id @default(autoincrement())
   jobRole   String  @db.VarChar(50)
   workShift String  @db.VarChar(50)
-  person    Person? @relation(fields: [personId], references: [id])
   personId  Int?    @unique
+  person    Person? @relation(fields: [personId], references: [id])
 }
 
 model Subsidiary {
@@ -62,65 +56,48 @@ model Subsidiary {
   description String   @db.VarChar(150)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  userAt      Int      @db.Int
+  userAt      Int
 }
 
 model Sale {
   id          Int           @id @default(autoincrement())
-  totalAmount Decimal       @db.Decimal()
+  totalAmount Decimal       @db.Decimal(10, 0)
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
-  userAt      Int           @db.Int
-  products    SaleProduct[]
+  userAt      Int
+  SaleProduct SaleProduct[]
 }
 
 model Product {
-  id        Int           @id @default(autoincrement())
-  name      String        @db.VarChar(50)
-  price     Decimal       @db.Decimal()
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
-  userAt    Int           @db.Int
-  sales     SaleProduct[]
-  order     Order[]
-  stock     Stock?
-}
-
-model SaleProduct {
-  product       Product  @relation(fields: [productId], references: [id])
-  productId     Int
-  sale          Sale     @relation(fields: [saleId], references: [id])
-  saleId        Int
-  quantity      Int
-  partialAmount Decimal  @db.Decimal()
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  userAt        Int      @db.Int
-
-  @@id([productId, saleId])
+  id          Int           @id @default(autoincrement())
+  name        String        @db.VarChar(50)
+  price       Decimal       @db.Decimal(10, 0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  userAt      Int
+  SaleProduct SaleProduct[]
+  stock       Stock?
 }
 
 model Stock {
   id            Int      @id @default(autoincrement())
-  initialAmount Int      @db.Int
-  currentAmount Int      @db.Int
+  initialAmount Int
+  currentAmount Int
   date          DateTime @db.Date
-  product       Product  @relation(fields: [productId], references: [id])
   productId     Int      @unique
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-  userAt        Int      @db.Int
+  userAt        Int
+  product       Product  @relation(fields: [productId], references: [id])
 }
 
 model Order {
   id        Int      @id @default(autoincrement())
-  client    Client   @relation(fields: [clientId], references: [id])
   clientId  Int      @unique
-  product   Product  @relation(fields: [productId], references: [id])
-  productId Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  userAt    Int      @db.Int
+  userAt    Int
+  client    Client   @relation(fields: [clientId], references: [id])
 }
 
 model Role {
@@ -131,22 +108,36 @@ model Supply {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  userAt    Int      @db.Int
+  userAt    Int
 }
 
 model DailyQuota {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  userAt    Int      @db.Int
+  userAt    Int
 }
 
 model DataSettings {
   id         Int      @id @default(autoincrement())
   table      String   @db.VarChar(50)
   field      String   @db.VarChar(50)
-  properties Json     @db.Json
+  properties String   @db.LongText
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  userAt     Int      @db.Int
+  userAt     Int
+}
+
+model SaleProduct {
+  productId     Int
+  saleId        Int
+  partialAmount Decimal  @db.Decimal(10, 0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime
+  userAt        Int
+  Product       Product  @relation(fields: [productId], references: [id])
+  Sale          Sale     @relation(fields: [saleId], references: [id])
+
+  @@id([productId, saleId])
+  @@index([saleId], map: "SaleProduct_saleId_fkey")
 }

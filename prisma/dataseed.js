@@ -6,9 +6,21 @@ export const people = [
         gender: 'f',
     },
     {
-        run: '12432s4',
+        run: '124325',
         names: 'juan',
         lastName: 'tarqui',
+        gender: 'm',
+    },
+    {
+        run: '12325',
+        names: 'pablo',
+        lastName: 'mamani',
+        gender: 'm',
+    },
+    {
+        run: '11325',
+        names: 'paolo',
+        lastName: 'mamani',
         gender: 'm',
     }
 ]
@@ -18,7 +30,7 @@ export const users = [
         username: 'admin',
         email: 'admin@example.com',
         password: '$2a$10$NJwtsnGBiJM7oqvTPWBHZeSTfrYFVDjL9tjRPRTLf/oUQ1nTBRxN.',
-        personId: 1
+        personId: 2
     }
 ]
 
@@ -31,7 +43,16 @@ export const employees = [
     {
         jobRole: 'hornero',
         workShift: 'tarde',
-        personId: 2
+        personId: 3
+    }
+]
+
+export const clients = [
+    {
+        shippingAddress: 'Paseo Ahumada 123',
+        billName: 'Mamani',
+        rut: "11325-R",
+        personId: 4
     }
 ]
 

@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { users, people, employees, products } from './dataseed.js'
+import { users, people, employees, products, clients } from './dataseed.js'
 const prisma = new PrismaClient()
 
 async function main() {
@@ -38,6 +38,20 @@ async function main() {
             create: {
                 jobRole,
                 workShift,
+                personId
+            },
+        })
+    })
+
+    clients.forEach(async p => {
+        const { jobRole, workShift, personId } = p
+        await prisma.client.upsert({
+            where: { personId },
+            update: {},
+            create: {
+                shippingAddress,
+                billName,
+                rut,
                 personId
             },
         })
