@@ -5,25 +5,17 @@ generator client {
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
-}
-
-model User {
-  id       Int     @id @default(autoincrement())
-  username String  @unique(map: "username") @db.VarChar(255)
-  email    String? @unique(map: "email") @db.VarChar(255)
-  password String  @db.VarChar(255)
-  personId Int?    @unique
-  person   Person? @relation(fields: [personId], references: [id])
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 model Person {
   id        Int       @id @default(autoincrement())
-  run       String?   @unique(map: "run") @db.VarChar(50)
+  run       String?   @unique @db.VarChar(50)
   names     String    @db.VarChar(50)
   lastName  String?   @db.VarChar(50)
   gender    String?   @db.Char(1)
-  address   String?   @db.LongText
-  contact   String?   @db.LongText
+  address   String?   @db.VarChar(250)
+  contact   String?   @db.VarChar(50)
   birthdate DateTime? @db.Date
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -32,13 +24,22 @@ model Person {
   user      User?
 }
 
+model User {
+  id       Int     @id @default(autoincrement())
+  username String  @unique @db.VarChar(255)
+  email    String? @unique @db.VarChar(255)
+  password String  @db.VarChar(255)
+  person   Person  @relation(fields: [personId], references: [id])
+  personId Int     @unique
+}
+
 model Client {
   id              Int     @id @default(autoincrement())
-  shippingAddress String  @db.LongText
+  shippingAddress String  @db.VarChar(100)
   billName        String? @db.VarChar(100)
-  rut             String? @db.VarChar(100)
-  personId        Int?    @unique
-  person          Person? @relation(fields: [personId], references: [id])
+  rut             String? @db.VarChar(100) @unique
+  personId        Int     @unique
+  person          Person  @relation(fields: [personId], references: [id])
   order           Order?
 }
 
@@ -46,8 +47,8 @@ model Employee {
   id        Int     @id @default(autoincrement())
   jobRole   String  @db.VarChar(50)
   workShift String  @db.VarChar(50)
-  personId  Int?    @unique
-  person    Person? @relation(fields: [personId], references: [id])
+  personId  Int     @unique
+  person    Person  @relation(fields: [personId], references: [id])
 }
 
 model Subsidiary {
@@ -59,24 +60,50 @@ model Subsidiary {
   userAt      Int
 }
 
+model Product {
+  id           Int           @id @default(autoincrement())
+  name         String        @db.VarChar(50)
+  price        Decimal       @db.Decimal(10, 0)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  userAt       Int
+  orderProduct OrderProduct[]
+  stock        Stock?
+}
+
+model Order {
+  id        Int      @id @default(autoincrement())
+  date      DateTime @db.Date
+  clientId  Int      @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userAt    Int
+  client    Client   @relation(fields: [clientId], references: [id])
+  orderProduct OrderProduct[]
+  sale      Sale?
+}
+
+model OrderProduct {
+  id        Int      @id @default(autoincrement())
+  productId Int
+  orderId   Int
+  quantity  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userAt    Int
+  product   Product  @relation(fields: [productId], references: [id])
+  order     Order    @relation(fields: [orderId], references: [id])
+}
+
 model Sale {
   id          Int           @id @default(autoincrement())
+  date        DateTime      @db.Date
   totalAmount Decimal       @db.Decimal(10, 0)
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   userAt      Int
-  SaleProduct SaleProduct[]
-}
-
-model Product {
-  id          Int           @id @default(autoincrement())
-  name        String        @db.VarChar(50)
-  price       Decimal       @db.Decimal(10, 0)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  userAt      Int
-  SaleProduct SaleProduct[]
-  stock       Stock?
+  orderId     Int           @unique
+  order       Order         @relation(fields: [orderId], references: [id])
 }
 
 model Stock {
@@ -89,15 +116,6 @@ model Stock {
   updatedAt     DateTime @updatedAt
   userAt        Int
   product       Product  @relation(fields: [productId], references: [id])
-}
-
-model Order {
-  id        Int      @id @default(autoincrement())
-  clientId  Int      @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  userAt    Int
-  client    Client   @relation(fields: [clientId], references: [id])
 }
 
 model Role {
@@ -126,18 +144,4 @@ model DataSettings {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   userAt     Int
-}
-
-model SaleProduct {
-  productId     Int
-  saleId        Int
-  partialAmount Decimal  @db.Decimal(10, 0)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime
-  userAt        Int
-  Product       Product  @relation(fields: [productId], references: [id])
-  Sale          Sale     @relation(fields: [saleId], references: [id])
-
-  @@id([productId, saleId])
-  @@index([saleId], map: "SaleProduct_saleId_fkey")
 }

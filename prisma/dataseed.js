@@ -49,10 +49,10 @@ export const employees = [
 
 export const clients = [
     {
-        shippingAddress: 'Paseo Ahumada 123',
+        shippingAddress: "Paseo Ahumada 123",
         billName: 'Mamani',
         rut: "11325-R",
-        personId: 4
+        personId: 1
     }
 ]
 

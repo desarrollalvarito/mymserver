@@ -3,18 +3,6 @@ import { users, people, employees, products, clients } from './dataseed.js'
 const prisma = new PrismaClient()
 
 async function main() {
-    users.forEach(async u => {
-        const { username, email, password } = u
-        await prisma.user.upsert({
-            where: { email },
-            update: {},
-            create: {
-                username,
-                email,
-                password
-            },
-        })
-    })
 
     people.forEach(async p => {
         const { run, names, lastName, gender } = p
@@ -26,6 +14,19 @@ async function main() {
                 names,
                 lastName,
                 gender
+            },
+        })
+    })
+    users.forEach(async u => {
+        const { username, email, password, personId } = u
+        await prisma.user.upsert({
+            where: { email },
+            update: {},
+            create: {
+                username,
+                email,
+                password,
+                personId
             },
         })
     })
@@ -44,9 +45,9 @@ async function main() {
     })
 
     clients.forEach(async p => {
-        const { jobRole, workShift, personId } = p
+        const { shippingAddress, billName, rut, personId } = p
         await prisma.client.upsert({
-            where: { personId },
+            where: { rut },
             update: {},
             create: {
                 shippingAddress,
