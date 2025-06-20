@@ -4,7 +4,11 @@ import { generateToken } from '../helpers/tokenManager.js'
 
 export const list = async (req, res) => {
     try {
-        let clients = await prisma.client.findMany()
+        let clients = await prisma.client.findMany({
+            include: {
+                person: true
+            }
+        })
         return res.send(clients)
     } catch (error) {
         return res.json({ error })

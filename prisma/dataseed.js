@@ -1,27 +1,15 @@
 export const people = [
     {
-        run: '124324',
-        names: 'julia',
-        lastName: 'tarqui',
-        gender: 'f',
+        run: '21325',
+        names: 'pablo Kevin',
+        lastName: 'Oro mamani',
+        gender: 'm'
     },
     {
-        run: '124325',
-        names: 'juan',
-        lastName: 'tarqui',
-        gender: 'm',
-    },
-    {
-        run: '12325',
-        names: 'pablo',
-        lastName: 'mamani',
-        gender: 'm',
-    },
-    {
-        run: '11325',
-        names: 'paolo',
-        lastName: 'mamani',
-        gender: 'm',
+        run: '20325',
+        names: 'Luis paolo',
+        lastName: 'Aro mamani',
+        gender: 'm'
     }
 ]
 
@@ -30,7 +18,12 @@ export const users = [
         username: 'admin',
         email: 'admin@example.com',
         password: '$2a$10$NJwtsnGBiJM7oqvTPWBHZeSTfrYFVDjL9tjRPRTLf/oUQ1nTBRxN.',
-        personId: 2
+        person: {
+            run: '124325',
+            names: 'juan',
+            lastName: 'tarqui',
+            gender: 'm'
+        }
     }
 ]
 
@@ -38,12 +31,24 @@ export const employees = [
     {
         jobRole: 'administrador',
         workShift: 'completo',
-        personId: 1
+        person: {
+            id: 10,
+            run: '124324',
+            names: 'julia',
+            lastName: 'tarqui',
+            gender: 'f'
+        }
     },
     {
         jobRole: 'hornero',
         workShift: 'tarde',
-        personId: 3
+        person: {
+            id: 11,
+            run: '12325',
+            names: 'pablo',
+            lastName: 'mamani',
+            gender: 'm'
+        }
     }
 ]
 
@@ -52,7 +57,12 @@ export const clients = [
         shippingAddress: "Paseo Ahumada 123",
         billName: 'Mamani',
         rut: "11325-R",
-        personId: 1
+        person: {
+            run: '11325',
+            names: 'paolo',
+            lastName: 'mamani',
+            gender: 'm'
+        }
     }
 ]
 

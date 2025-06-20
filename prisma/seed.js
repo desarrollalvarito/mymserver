@@ -17,8 +17,9 @@ async function main() {
             },
         })
     })
+
     users.forEach(async u => {
-        const { username, email, password, personId } = u
+        const { username, email, password, person } = u
         await prisma.user.upsert({
             where: { email },
             update: {},
@@ -26,26 +27,40 @@ async function main() {
                 username,
                 email,
                 password,
-                personId
+                person:{
+                    create:{
+                        run: person.run,
+                        names: person.names,
+                        lastName: person.lastName,
+                        gender: person.gender
+                    }
+                }
             },
         })
     })
 
     employees.forEach(async p => {
-        const { jobRole, workShift, personId } = p
+        const { jobRole, workShift, person } = p
         await prisma.employee.upsert({
-            where: { personId },
+            where: { personId: person.id },
             update: {},
             create: {
                 jobRole,
                 workShift,
-                personId
+                person:{
+                    create:{
+                        run: person.run,
+                        names: person.names,
+                        lastName: person.lastName,
+                        gender: person.gender
+                    }
+                }
             },
         })
     })
 
     clients.forEach(async p => {
-        const { shippingAddress, billName, rut, personId } = p
+        const { shippingAddress, billName, rut, person } = p
         await prisma.client.upsert({
             where: { rut },
             update: {},
@@ -53,7 +68,14 @@ async function main() {
                 shippingAddress,
                 billName,
                 rut,
-                personId
+                person:{
+                    create:{
+                        run: person.run,
+                        names: person.names,
+                        lastName: person.lastName,
+                        gender: person.gender
+                    }
+                }
             },
         })
     })

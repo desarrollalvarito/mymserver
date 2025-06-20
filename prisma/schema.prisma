@@ -69,6 +69,7 @@ model Product {
   userAt       Int
   orderProduct OrderProduct[]
   stock        Stock?
+  dailyQuota   DailyQuota[]
 }
 
 model Order {
@@ -88,6 +89,7 @@ model OrderProduct {
   productId Int
   orderId   Int
   quantity  Int
+  extra     Boolean @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   userAt    Int
@@ -131,6 +133,10 @@ model Supply {
 
 model DailyQuota {
   id        Int      @id @default(autoincrement())
+  date      DateTime @db.Date
+  quota     Int
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   userAt    Int
