@@ -1,6 +1,6 @@
 import { prisma } from '../config/db.js'
 import { body } from 'express-validator'
-import { generateToken } from '../helpers/tokenManager.js'
+import { generateToken } from '../helpers/token.helper.js'
 
 export const list = async (req, res) => {
     try {

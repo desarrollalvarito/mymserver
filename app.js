@@ -24,6 +24,4 @@ app.get('/', (req, res) => {
     res.send('Welcome to the API');
 })
 
-const port = process.env.PORT || 3000;
-app.listen(port);
-console.log("Express in port " + port);
+export default app;

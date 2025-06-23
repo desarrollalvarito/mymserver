@@ -21,17 +21,14 @@ const defineModel = Prisma.defineExtension({
                 let user = await prisma.user.findUnique({
                     where: {
                         username
-                    },
-                    include: {
-                        person: true
                     }
                 })
                 if (!user) {
-                    return { login: false }
+                    return null
                 }
                 else {
                     if (bycrypt.compareSync(password, user.password)) {
-                        return { login: true, user }
+                        return user
                     }
                 }
             },

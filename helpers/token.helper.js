@@ -7,7 +7,7 @@ const secret = process.env.JWT_SECRET || 'secret'
 export const generateToken = (username) =>{
     try {
         const token = jwt.sign({username}, secret, {expiresIn})
-        return {token, expiresIn}
+        return {token}
     } catch (error) {
         console.log('Error: ',error.message);
     }

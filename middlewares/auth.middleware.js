@@ -1,4 +1,4 @@
-import { verifyToken } from "../helpers/tokenManager.js"
+import { verifyToken } from "../helpers/token.helper.js"
 
 export const validateToken = (req, res, next) => {
     try {

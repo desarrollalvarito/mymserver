@@ -1,6 +1,6 @@
 import { prisma } from '../config/db.js'
 import { body } from 'express-validator'
-import { generateToken } from '../helpers/tokenManager.js'
+import { generateToken, verifyToken } from '../helpers/token.helper.js'
 
 export const get = async (req, res) => {
     try {
@@ -11,17 +11,51 @@ export const get = async (req, res) => {
     }
 }
 
+export const session = async (req, res) => {
+    const token = req.headers.authorization
+    try {
+        let verified = verifyToken(token)
+        console.log(verified);
+        if (!verified) { return res.status(403).json({ error: 'token not valid' }) }
+        else {
+            let user = await prisma.user.findUnique({
+                where: {
+                    username: verified.username
+                },
+                omit: {
+                    password: true
+                },
+                include: {
+                    person: {
+                        select: {
+                            run: true,
+                            names: true,
+                            lastName: true,
+                            gender: true,
+                            birthdate: true,
+                        }
+                    }
+                }
+            })
+            console.log(user);
+            return res.send(user)
+        }
+    } catch (error) {
+        return res.json(error.message)
+    }
+}
+
 export const login = async (req, res) => {
     const { username, password } = req.body
     try {
-        let data = await prisma.user.login(username, password)
-        if (!data.login) {
-            return res.status(403).json({ login: false, error: 'credentials not valid' })
+        const data = await prisma.user.login(username, password)
+        if (!data) {
+            return res.status(403).json({ error: 'credentials not valid' })
         }
-        const { token, expiresIn } = generateToken(username)
-        return res.json({ data, token, expiresIn })
+        const token = generateToken(username)
+        return res.json({ token: token.token, user: { id: data.id, username: data.username, email: data.email } })
     } catch (error) {
-        return res.json({ login: false, error })
+        return res.json(error.message)
     }
 }
 
