@@ -15,7 +15,6 @@ export const session = async (req, res) => {
     const token = req.headers.authorization
     try {
         let verified = verifyToken(token)
-        console.log(verified);
         if (!verified) { return res.status(403).json({ error: 'token not valid' }) }
         else {
             let user = await prisma.user.findUnique({
@@ -37,7 +36,6 @@ export const session = async (req, res) => {
                     }
                 }
             })
-            console.log(user);
             return res.send(user)
         }
     } catch (error) {
@@ -50,7 +48,7 @@ export const login = async (req, res) => {
     try {
         const data = await prisma.user.login(username, password)
         if (!data) {
-            return res.status(403).json({ error: 'credentials not valid' })
+            throw new Error("Invalid username or password")
         }
         const token = generateToken(username)
         return res.json({ token: token.token, user: { id: data.id, username: data.username, email: data.email } })
@@ -100,6 +98,10 @@ export const update = async (req, res) => {
 
 export const info = (req, res) => {
     return res.json({ ok: true })
+}
+
+export const logout = (req, res) => {
+    return res.status(200).json({ message: 'Session logout' })
 }
 
 export const validate = (method) => {
