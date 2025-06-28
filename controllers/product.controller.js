@@ -25,6 +25,7 @@ export const add = async (req, res) => {
         )
         return res.send(product)
     } catch (error) {
+        console.log(error);
         return res.json({ error })
     }
 }
