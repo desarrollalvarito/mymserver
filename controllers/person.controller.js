@@ -12,14 +12,15 @@ export const list = async (req, res) => {
 }
 
 export const add = async (req, res) => {
-    const { run, names, lastNames, gender, address, contact, birthdate } = req.body
+    console.log(req.body)
+    const { run, names, lastName, gender, address, contact, birthdate } = req.body
     try {
         let person = await prisma.person.create(
             {
                 data: {
                     run,
                     names,
-                    lastNames,
+                    lastName,
                     gender,
                     address,
                     contact,
@@ -27,13 +28,16 @@ export const add = async (req, res) => {
                 }
             }
         )
+        console.log(person)
         return res.send(person)
     } catch (error) {
+        console.log(error)
         return res.json({ error })
     }
 }
 export const modify = async (req, res) => {
-    const { id, run, names, lastNames, gender, address, contact, birthdate } = req.body
+    console.log(req.body)
+    const { id, run, names, lastName, gender, address, contact, birthdate } = req.body
     try {
         let person = await prisma.person.update(
             {
@@ -43,7 +47,7 @@ export const modify = async (req, res) => {
                 data: {
                     run,
                     names,
-                    lastNames,
+                    lastName,
                     gender,
                     address,
                     contact,

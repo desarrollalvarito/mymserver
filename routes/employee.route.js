@@ -7,7 +7,7 @@ const router = Router()
 
 router.get('/list', list)
 router.post('/add', add)
-router.get('/modify', modify)
-router.get('/remove', remove)
+router.put('/modify', modify)
+router.delete('/remove', remove)
 
 export default router

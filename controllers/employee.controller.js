@@ -15,9 +15,9 @@ export const list = async (req, res) => {
 }
 
 export const add = async (req, res) => {
+    console.log(req.body)
     try {
         const { jobRole, workShift, personId } = req.body
-        console.log(req.body);
         let employee = await prisma.employee.create({
             data: {
                 jobRole,
@@ -27,6 +27,7 @@ export const add = async (req, res) => {
         })
         return res.send(employee)
     } catch (error) {
+        console.log(error)
         return res.json({ ok: false, error })
     }
 }
