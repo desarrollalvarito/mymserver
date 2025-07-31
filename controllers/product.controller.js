@@ -46,6 +46,7 @@ export const modify = async (req, res) => {
                 }
             }
         )
+        console.log(product);
         return res.send(product)
     } catch (error) {
         return res.json({ error })
