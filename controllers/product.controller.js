@@ -12,6 +12,7 @@ export const list = async (req, res) => {
 }
 
 export const add = async (req, res) => {
+    console.log(req.body)
     const { name, price, userAt } = req.body
     try {
         let product = await prisma.product.create(
@@ -30,6 +31,7 @@ export const add = async (req, res) => {
     }
 }
 export const modify = async (req, res) => {
+    console.log(req.body)
     const { id, name, price, userAt } = req.body
     try {
         let product = await prisma.product.update(
