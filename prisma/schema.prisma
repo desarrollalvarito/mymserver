@@ -76,6 +76,7 @@ model Order {
   id        Int      @id @default(autoincrement())
   date      DateTime @db.Date
   clientId  Int      @unique
+  status    String   @db.VarChar(20) @default("Pendiente")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   userAt    Int
