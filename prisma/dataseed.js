@@ -3,13 +3,37 @@ export const people = [
         run: '21325',
         names: 'pablo Kevin',
         lastName: 'Oro mamani',
-        gender: 'm'
+        gender: 'MALE'
     },
     {
         run: '20325',
         names: 'Luis paolo',
         lastName: 'Aro mamani',
-        gender: 'm'
+        gender: 'MALE'
+    },
+    {
+        run: '124325',
+        names: 'juan',
+        lastName: 'tarqui',
+        gender: 'MALE'
+    },
+    {
+        run: '124324',
+        names: 'julia',
+        lastName: 'tarqui',
+        gender: 'FEMALE'
+    },
+    {
+        run: '12325',
+        names: 'pablo',
+        lastName: 'mamani',
+        gender: 'MALE'
+    },
+    {
+        run: '11325',
+        names: 'paolo',
+        lastName: 'mamani',
+        gender: 'MALE'
     }
 ]
 
@@ -18,37 +42,20 @@ export const users = [
         username: 'admin',
         email: 'admin@example.com',
         password: '$2a$10$NJwtsnGBiJM7oqvTPWBHZeSTfrYFVDjL9tjRPRTLf/oUQ1nTBRxN.',
-        person: {
-            run: '124325',
-            names: 'juan',
-            lastName: 'tarqui',
-            gender: 'm'
-        }
+        personId: 1
     }
 ]
 
 export const employees = [
     {
-        jobRole: 'administrador',
+        jobRole: 'ADMINISTRATOR',
         workShift: 'completo',
-        person: {
-            id: 10,
-            run: '124324',
-            names: 'julia',
-            lastName: 'tarqui',
-            gender: 'f'
-        }
+        personId: 4
     },
     {
-        jobRole: 'hornero',
+        jobRole: 'COOK',
         workShift: 'tarde',
-        person: {
-            id: 11,
-            run: '12325',
-            names: 'pablo',
-            lastName: 'mamani',
-            gender: 'm'
-        }
+        personId: 5
     }
 ]
 
@@ -57,12 +64,7 @@ export const clients = [
         shippingAddress: "Paseo Ahumada 123",
         billName: 'Mamani',
         rut: "11325-R",
-        person: {
-            run: '11325',
-            names: 'paolo',
-            lastName: 'mamani',
-            gender: 'm'
-        }
+        personId: 6
     }
 ]
 
@@ -97,4 +99,31 @@ export const products = [
         price: 1300,
         userAt: 1
     },
+]
+
+export const orders = [
+    {
+        clientId: 1,
+        date: new Date(),
+        orderProduct: [
+            {
+                productId: 1,
+                quantity: 2,
+            },
+            {
+                productId: 2,
+                quantity: 1,
+            }
+        ]
+    },
+    {
+        clientId: 1,
+        date: new Date(),
+        orderProduct: [
+            {
+                productId: 3,
+                quantity: 3,
+            }
+        ]
+    }
 ]

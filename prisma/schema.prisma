@@ -3,17 +3,17 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider          = "mysql"
+  url               = env("DATABASE_URL")
   shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 model Person {
   id        Int       @id @default(autoincrement())
-  run       String?   @unique @db.VarChar(50)
+  run       String?   @unique(map: "run") @db.VarChar(50)
   names     String    @db.VarChar(50)
   lastName  String?   @db.VarChar(50)
-  gender    String?   @db.Char(1)
+  gender    Gender    @default(OTHER)
   address   String?   @db.VarChar(250)
   contact   String?   @db.VarChar(50)
   birthdate DateTime? @db.Date
@@ -26,29 +26,30 @@ model Person {
 
 model User {
   id       Int     @id @default(autoincrement())
-  username String  @unique @db.VarChar(255)
-  email    String? @unique @db.VarChar(255)
+  username String  @unique(map: "username") @db.VarChar(255)
+  email    String? @unique(map: "email") @db.VarChar(255)
   password String  @db.VarChar(255)
-  person   Person  @relation(fields: [personId], references: [id])
   personId Int     @unique
+  person   Person  @relation(fields: [personId], references: [id])
 }
 
 model Client {
   id              Int     @id @default(autoincrement())
   shippingAddress String  @db.VarChar(100)
   billName        String? @db.VarChar(100)
-  rut             String? @db.VarChar(100) @unique
+  rut             String? @unique @db.VarChar(100)
   personId        Int     @unique
   person          Person  @relation(fields: [personId], references: [id])
-  order           Order?
+  order           Order[]
 }
 
 model Employee {
-  id        Int     @id @default(autoincrement())
-  jobRole   String  @db.VarChar(50)
-  workShift String  @db.VarChar(50)
-  personId  Int     @unique
-  person    Person  @relation(fields: [personId], references: [id])
+  id        Int      @id @default(autoincrement())
+  jobRole   JobRoles @default(COOK)
+  workShift String   @db.VarChar(50)
+  state     State    @default(ACTIVE)
+  personId  Int      @unique
+  person    Person   @relation(fields: [personId], references: [id])
 }
 
 model Subsidiary {
@@ -61,28 +62,30 @@ model Subsidiary {
 }
 
 model Product {
-  id           Int           @id @default(autoincrement())
-  name         String        @db.VarChar(50)
-  price        Decimal       @db.Decimal(10, 0)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  id           Int            @id @default(autoincrement())
+  name         String         @db.VarChar(50)
+  price        Decimal        @db.Decimal(10, 0)
+  state        State          @default(ACTIVE)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
   userAt       Int
   orderProduct OrderProduct[]
   stock        Stock?
-  dailyQuota   DailyQuota[]
 }
 
 model Order {
-  id        Int      @id @default(autoincrement())
-  date      DateTime @db.Date
-  clientId  Int      @unique
-  status    String   @db.VarChar(20) @default("Pendiente")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  userAt    Int
-  client    Client   @relation(fields: [clientId], references: [id])
+  id           Int            @id @default(autoincrement())
+  date         DateTime       @db.Date
+  state        OrderState     @default(PENDING)
+  clientId     Int
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  userAt       Int
+  client       Client         @relation(fields: [clientId], references: [id])
   orderProduct OrderProduct[]
-  sale      Sale?
+  sale         Sale?
+
+  @@index([clientId], map: "Order_clientId_fkey")
 }
 
 model OrderProduct {
@@ -90,23 +93,27 @@ model OrderProduct {
   productId Int
   orderId   Int
   quantity  Int
-  extra     Boolean @default(false)
+  aditional Boolean  @default(false)
+  state     State    @default(ACTIVE)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   userAt    Int
-  product   Product  @relation(fields: [productId], references: [id])
   order     Order    @relation(fields: [orderId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@index([orderId], map: "OrderProduct_orderId_fkey")
+  @@index([productId], map: "OrderProduct_productId_fkey")
 }
 
 model Sale {
-  id          Int           @id @default(autoincrement())
-  date        DateTime      @db.Date
-  totalAmount Decimal       @db.Decimal(10, 0)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id          Int      @id @default(autoincrement())
+  date        DateTime @db.Date
+  totalAmount Decimal  @db.Decimal(10, 0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   userAt      Int
-  orderId     Int           @unique
-  order       Order         @relation(fields: [orderId], references: [id])
+  orderId     Int      @unique
+  order       Order    @relation(fields: [orderId], references: [id])
 }
 
 model Stock {
@@ -121,10 +128,6 @@ model Stock {
   product       Product  @relation(fields: [productId], references: [id])
 }
 
-model Role {
-  id Int @id @default(autoincrement())
-}
-
 model Supply {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
@@ -134,10 +137,6 @@ model Supply {
 
 model DailyQuota {
   id        Int      @id @default(autoincrement())
-  date      DateTime @db.Date
-  quota     Int
-  productId Int
-  product   Product  @relation(fields: [productId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   userAt    Int
@@ -151,4 +150,30 @@ model DataSettings {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   userAt     Int
+}
+
+enum JobRoles {
+  MANAGER
+  ADMINISTRATOR
+  COOK
+  DELIVERY
+  CASHIER
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum OrderState {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum State {
+  ACTIVE
+  INACTIVE
 }

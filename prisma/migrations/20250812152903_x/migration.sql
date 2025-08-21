@@ -4,7 +4,7 @@ CREATE TABLE `Person` (
     `run` VARCHAR(50) NULL,
     `names` VARCHAR(50) NOT NULL,
     `lastName` VARCHAR(50) NULL,
-    `gender` CHAR(1) NULL,
+    `gender` ENUM('MALE', 'FEMALE', 'OTHER') NOT NULL DEFAULT 'OTHER',
     `address` VARCHAR(250) NULL,
     `contact` VARCHAR(50) NULL,
     `birthdate` DATE NULL,
@@ -45,8 +45,9 @@ CREATE TABLE `Client` (
 -- CreateTable
 CREATE TABLE `Employee` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `jobRole` VARCHAR(50) NOT NULL,
+    `jobRole` ENUM('MANAGER', 'ADMINISTRATOR', 'COOK', 'DELIVERY', 'CASHIER') NOT NULL DEFAULT 'COOK',
     `workShift` VARCHAR(50) NOT NULL,
+    `state` ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE',
     `personId` INTEGER NOT NULL,
 
     UNIQUE INDEX `Employee_personId_key`(`personId`),
@@ -70,6 +71,7 @@ CREATE TABLE `Product` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(50) NOT NULL,
     `price` DECIMAL(10, 0) NOT NULL,
+    `state` ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE',
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
     `userAt` INTEGER NOT NULL,
@@ -81,12 +83,13 @@ CREATE TABLE `Product` (
 CREATE TABLE `Order` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `date` DATE NOT NULL,
+    `state` ENUM('PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED') NOT NULL DEFAULT 'PENDING',
     `clientId` INTEGER NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
     `userAt` INTEGER NOT NULL,
 
-    UNIQUE INDEX `Order_clientId_key`(`clientId`),
+    INDEX `Order_clientId_fkey`(`clientId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -96,10 +99,14 @@ CREATE TABLE `OrderProduct` (
     `productId` INTEGER NOT NULL,
     `orderId` INTEGER NOT NULL,
     `quantity` INTEGER NOT NULL,
+    `aditional` BOOLEAN NOT NULL DEFAULT false,
+    `state` ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE',
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
     `userAt` INTEGER NOT NULL,
 
+    INDEX `OrderProduct_orderId_fkey`(`orderId`),
+    INDEX `OrderProduct_productId_fkey`(`productId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -129,13 +136,6 @@ CREATE TABLE `Stock` (
     `userAt` INTEGER NOT NULL,
 
     UNIQUE INDEX `Stock_productId_key`(`productId`),
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
-CREATE TABLE `Role` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
-
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -185,10 +185,10 @@ ALTER TABLE `Employee` ADD CONSTRAINT `Employee_personId_fkey` FOREIGN KEY (`per
 ALTER TABLE `Order` ADD CONSTRAINT `Order_clientId_fkey` FOREIGN KEY (`clientId`) REFERENCES `Client`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `OrderProduct` ADD CONSTRAINT `OrderProduct_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `Product`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `OrderProduct` ADD CONSTRAINT `OrderProduct_orderId_fkey` FOREIGN KEY (`orderId`) REFERENCES `Order`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `OrderProduct` ADD CONSTRAINT `OrderProduct_orderId_fkey` FOREIGN KEY (`orderId`) REFERENCES `Order`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `OrderProduct` ADD CONSTRAINT `OrderProduct_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `Product`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Sale` ADD CONSTRAINT `Sale_orderId_fkey` FOREIGN KEY (`orderId`) REFERENCES `Order`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
