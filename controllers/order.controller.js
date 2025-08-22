@@ -38,25 +38,14 @@ export const getProduct = async (req, res) => {
     }
 }
 
-export const listToday = async (req, res) => {
+export const list = async (req, res) => {
+    const { date } = req.body
     try {
-        const now = new Date();
-        const timezoneOffset = now.getTimezoneOffset() * 60000;
-
-        // Convertir inicio del día local a UTC
-        const startOfDayLocal = new Date(now);
-        startOfDayLocal.setHours(0, 0, 0, 0);
-        const startOfDayUTC = new Date(startOfDayLocal.getTime() - timezoneOffset);
-
-        // Convertir fin del día local a UTC
-        const endOfDayLocal = new Date(now);
-        endOfDayLocal.setHours(23, 59, 59, 999);
-        const endOfDayUTC = new Date(endOfDayLocal.getTime() - timezoneOffset);
+        const searchDate = new Date(date);
         let orders = await prisma.order.findMany({
             where: {
                 date: {
-                    gte: startOfDayUTC,
-                    lte: endOfDayUTC
+                    equals: searchDate,
                 },
             },
             select: {
@@ -90,47 +79,6 @@ export const listToday = async (req, res) => {
             return {
                 ...o,
                 quantity
-            }
-        })
-        return res.send(orders)
-    } catch (error) {
-        console.log(error);
-        return res.json({ error })
-    }
-}
-
-export const listDates = async (req, res) => {
-    try {
-        const { date } = req.body; // Espera formato YYYY-MM-DD
-
-        const startDate = new Date(date);
-        startDate.setHours(0, 0, 0, 0);
-
-        const endDate = new Date(startDate);
-        endDate.setDate(startDate.getDate() + 1);
-        let orderClient = await prisma.order.findMany({
-            where: {
-                date: {
-                    gte: startDate,
-                    lt: endDate
-                }
-            },
-            include: {
-                client: true
-            }
-        })
-        let quantity = await prisma.orderProduct.groupBy({
-            by: ['orderId'],
-            _sum: {
-                quantity: true
-            }
-
-        })
-        let orders = orderClient.map(o => {
-            let q = quantity.find(q => q.orderId === o.id)
-            return {
-                ...o,
-                quantity: q ? q._sum.quantity : 0
             }
         })
         return res.send(orders)
