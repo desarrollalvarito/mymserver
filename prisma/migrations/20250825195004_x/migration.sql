@@ -22,6 +22,9 @@ CREATE TABLE `User` (
     `email` VARCHAR(255) NULL,
     `password` VARCHAR(255) NOT NULL,
     `personId` INTEGER NOT NULL,
+    `isActive` BOOLEAN NOT NULL DEFAULT true,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
 
     UNIQUE INDEX `username`(`username`),
     UNIQUE INDEX `email`(`email`),
@@ -45,7 +48,7 @@ CREATE TABLE `Client` (
 -- CreateTable
 CREATE TABLE `Employee` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `jobRole` ENUM('MANAGER', 'ADMINISTRATOR', 'COOK', 'DELIVERY', 'CASHIER') NOT NULL DEFAULT 'COOK',
+    `jobRole` ENUM('MANAGER', 'ADMIN', 'BAKER', 'DELIVERY', 'CASHIER') NOT NULL DEFAULT 'BAKER',
     `workShift` VARCHAR(50) NOT NULL,
     `state` ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE',
     `personId` INTEGER NOT NULL,
@@ -70,7 +73,7 @@ CREATE TABLE `Subsidiary` (
 CREATE TABLE `Product` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(50) NOT NULL,
-    `price` DECIMAL(10, 0) NOT NULL,
+    `price` DECIMAL(10, 2) NOT NULL,
     `state` ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE',
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
@@ -83,7 +86,7 @@ CREATE TABLE `Product` (
 CREATE TABLE `Order` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `date` DATE NOT NULL,
-    `state` ENUM('PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED') NOT NULL DEFAULT 'PENDING',
+    `state` ENUM('PENDING', 'IN_PRODUCTION', 'READY', 'DELIVERED', 'CANCELLED') NOT NULL DEFAULT 'PENDING',
     `clientId` INTEGER NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
@@ -99,6 +102,7 @@ CREATE TABLE `OrderProduct` (
     `productId` INTEGER NOT NULL,
     `orderId` INTEGER NOT NULL,
     `quantity` INTEGER NOT NULL,
+    `unitPrice` DECIMAL(10, 2) NOT NULL,
     `aditional` BOOLEAN NOT NULL DEFAULT false,
     `state` ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE',
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -111,16 +115,78 @@ CREATE TABLE `OrderProduct` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Sale` (
+CREATE TABLE `Delivery` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `date` DATE NOT NULL,
-    `totalAmount` DECIMAL(10, 0) NOT NULL,
+    `orderId` INTEGER NOT NULL,
+    `driverId` INTEGER NOT NULL,
+    `status` ENUM('PENDING', 'SCHEDULED', 'IN_TRANSIT', 'DELIVERED', 'CANCELLED') NOT NULL DEFAULT 'PENDING',
+    `deliveryTime` DATETIME NULL,
+    `scheduled` DATETIME NULL,
+    `notes` VARCHAR(500) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
     `userAt` INTEGER NOT NULL,
-    `orderId` INTEGER NOT NULL,
 
-    UNIQUE INDEX `Sale_orderId_key`(`orderId`),
+    UNIQUE INDEX `Delivery_orderId_key`(`orderId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Production` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `date` DATE NOT NULL,
+    `assignedTo` INTEGER NOT NULL,
+    `status` ENUM('PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED') NOT NULL DEFAULT 'PENDING',
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+    `userAt` INTEGER NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `ProductionProduct` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `productionId` INTEGER NOT NULL,
+    `productId` INTEGER NOT NULL,
+    `quantity` INTEGER NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+    `userAt` INTEGER NOT NULL,
+
+    INDEX `ProductionProduct_productionId_fkey`(`productionId`),
+    INDEX `ProductionProduct_productId_fkey`(`productId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Sale` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `date` DATE NOT NULL,
+    `partialAmount` DECIMAL(10, 0) NOT NULL,
+    `discount` DECIMAL(10, 0) NOT NULL,
+    `totalAmount` DECIMAL(10, 0) NOT NULL,
+    `paymentMethod` ENUM('CASH', 'CARD', 'TRANSFER', 'DIGITAL') NOT NULL DEFAULT 'CASH',
+    `paymentStatus` ENUM('PENDING', 'PAID', 'PARTIAL', 'CANCELLED') NOT NULL DEFAULT 'PENDING',
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+    `userAt` INTEGER NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `SaleItem` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `saleId` INTEGER NOT NULL,
+    `productId` INTEGER NOT NULL,
+    `quantity` INTEGER NOT NULL,
+    `unitPrice` DECIMAL(10, 2) NOT NULL,
+    `totalPrice` DECIMAL(10, 2) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+    `userAt` INTEGER NOT NULL,
+
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -129,46 +195,12 @@ CREATE TABLE `Stock` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `initialAmount` INTEGER NOT NULL,
     `currentAmount` INTEGER NOT NULL,
-    `date` DATE NOT NULL,
     `productId` INTEGER NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
     `userAt` INTEGER NOT NULL,
 
     UNIQUE INDEX `Stock_productId_key`(`productId`),
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
-CREATE TABLE `Supply` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `updatedAt` DATETIME(3) NOT NULL,
-    `userAt` INTEGER NOT NULL,
-
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
-CREATE TABLE `DailyQuota` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `updatedAt` DATETIME(3) NOT NULL,
-    `userAt` INTEGER NOT NULL,
-
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
-CREATE TABLE `DataSettings` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `table` VARCHAR(50) NOT NULL,
-    `field` VARCHAR(50) NOT NULL,
-    `properties` LONGTEXT NOT NULL,
-    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `updatedAt` DATETIME(3) NOT NULL,
-    `userAt` INTEGER NOT NULL,
-
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -191,7 +223,25 @@ ALTER TABLE `OrderProduct` ADD CONSTRAINT `OrderProduct_orderId_fkey` FOREIGN KE
 ALTER TABLE `OrderProduct` ADD CONSTRAINT `OrderProduct_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `Product`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Sale` ADD CONSTRAINT `Sale_orderId_fkey` FOREIGN KEY (`orderId`) REFERENCES `Order`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `Delivery` ADD CONSTRAINT `Delivery_orderId_fkey` FOREIGN KEY (`orderId`) REFERENCES `Order`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Delivery` ADD CONSTRAINT `Delivery_driverId_fkey` FOREIGN KEY (`driverId`) REFERENCES `Employee`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Production` ADD CONSTRAINT `Production_assignedTo_fkey` FOREIGN KEY (`assignedTo`) REFERENCES `Employee`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `ProductionProduct` ADD CONSTRAINT `ProductionProduct_productionId_fkey` FOREIGN KEY (`productionId`) REFERENCES `Production`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `ProductionProduct` ADD CONSTRAINT `ProductionProduct_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `Product`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `SaleItem` ADD CONSTRAINT `SaleItem_saleId_fkey` FOREIGN KEY (`saleId`) REFERENCES `Sale`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `SaleItem` ADD CONSTRAINT `SaleItem_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `Product`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Stock` ADD CONSTRAINT `Stock_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `Product`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

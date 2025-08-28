@@ -25,12 +25,15 @@ model Person {
 }
 
 model User {
-  id       Int     @id @default(autoincrement())
-  username String  @unique(map: "username") @db.VarChar(255)
-  email    String? @unique(map: "email") @db.VarChar(255)
-  password String  @db.VarChar(255)
-  personId Int     @unique
-  person   Person  @relation(fields: [personId], references: [id])
+  id          Int       @id @default(autoincrement())
+  username    String    @unique(map: "username") @db.VarChar(255)
+  email       String?   @unique(map: "email") @db.VarChar(255)
+  password    String    @db.VarChar(255)
+  personId    Int       @unique
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  person      Person    @relation(fields: [personId], references: [id])
 }
 
 model Client {
@@ -44,12 +47,15 @@ model Client {
 }
 
 model Employee {
-  id        Int      @id @default(autoincrement())
-  jobRole   JobRoles @default(COOK)
-  workShift String   @db.VarChar(50)
-  state     State    @default(ACTIVE)
-  personId  Int      @unique
-  person    Person   @relation(fields: [personId], references: [id])
+  id              Int          @id @default(autoincrement())
+  jobRole         JobRoles     @default(BAKER)
+  workShift       String       @db.VarChar(50)
+  state           State        @default(ACTIVE)
+  personId        Int          @unique
+  // Relaciones
+  person          Person       @relation(fields: [personId], references: [id])
+  delivery        Delivery[]   @relation("EmployeeDelivery")
+  production      Production[] @relation("ProductionCook")
 }
 
 model Subsidiary {
@@ -62,65 +68,134 @@ model Subsidiary {
 }
 
 model Product {
-  id           Int            @id @default(autoincrement())
-  name         String         @db.VarChar(50)
-  price        Decimal        @db.Decimal(10, 0)
-  state        State          @default(ACTIVE)
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  userAt       Int
-  orderProduct OrderProduct[]
-  stock        Stock?
+  id                  Int            @id @default(autoincrement())
+  name                String         @db.VarChar(50)
+  price               Decimal        @db.Decimal(10, 2)
+  state               State          @default(ACTIVE)
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  userAt              Int
+  orderProduct        OrderProduct[]
+  stock               Stock?
+  saleItem            SaleItem[]
+  productionProduct   ProductionProduct[]
 }
 
 model Order {
   id           Int            @id @default(autoincrement())
   date         DateTime       @db.Date
-  state        OrderState     @default(PENDING)
+  state        OrderStatus    @default(PENDING)
   clientId     Int
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   userAt       Int
   client       Client         @relation(fields: [clientId], references: [id])
+  delivery     Delivery?
   orderProduct OrderProduct[]
-  sale         Sale?
 
   @@index([clientId], map: "Order_clientId_fkey")
 }
 
 model OrderProduct {
-  id        Int      @id @default(autoincrement())
-  productId Int
-  orderId   Int
-  quantity  Int
-  aditional Boolean  @default(false)
-  state     State    @default(ACTIVE)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  userAt    Int
-  order     Order    @relation(fields: [orderId], references: [id])
-  product   Product  @relation(fields: [productId], references: [id])
+  id                Int      @id @default(autoincrement())
+  productId         Int
+  orderId           Int
+  quantity          Int
+  unitPrice         Decimal  @db.Decimal(10, 2)
+  aditional         Boolean  @default(false)
+  state             State    @default(ACTIVE)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  userAt            Int
+
+  // Relaciones
+  order             Order    @relation(fields: [orderId], references: [id])
+  product           Product  @relation(fields: [productId], references: [id])
 
   @@index([orderId], map: "OrderProduct_orderId_fkey")
   @@index([productId], map: "OrderProduct_productId_fkey")
 }
 
+model Delivery {
+  id              Int            @id @default(autoincrement())
+  orderId         Int            @unique
+  driverId        Int            
+  status          DeliveryStatus @default(PENDING)
+  deliveryTime    DateTime?      @db.DateTime
+  scheduled       DateTime?      @db.DateTime
+  notes           String?        @db.VarChar(500)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  userAt          Int
+
+  // Relaciones
+  order           Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  driver          Employee       @relation(fields: [driverId], references: [id], name: "EmployeeDelivery")
+}
+
+model Production {
+  id                Int              @id @default(autoincrement())
+  date              DateTime         @db.Date
+  assignedTo        Int              // usuario cocinero
+  status            ProductionStatus @default(PENDING)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  userAt            Int
+
+  // Relaciones
+  cook              Employee         @relation(fields: [assignedTo], references: [id], name: "ProductionCook")
+  productionProduct ProductionProduct[]
+}
+
+model ProductionProduct {
+  id                  Int             @id @default(autoincrement())
+  productionId        Int
+  productId           Int
+  quantity            Int
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  userAt              Int
+  production          Production      @relation(fields: [productionId], references: [id])
+  product             Product         @relation(fields: [productId], references: [id])
+
+  @@index([productionId], map: "ProductionProduct_productionId_fkey")
+  @@index([productId], map: "ProductionProduct_productId_fkey")
+}
+
 model Sale {
+  id            Int           @id @default(autoincrement())
+  date          DateTime      @db.Date
+  partialAmount Decimal       @db.Decimal(10, 0)
+  discount      Decimal       @db.Decimal(10, 0)
+  totalAmount   Decimal       @db.Decimal(10, 0)
+  paymentMethod PaymentMethod @default(CASH)
+  paymentStatus PaymentStatus @default(PENDING)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  userAt        Int
+  saleItem      SaleItem[]
+}
+
+model SaleItem {
   id          Int      @id @default(autoincrement())
-  date        DateTime @db.Date
-  totalAmount Decimal  @db.Decimal(10, 0)
+  saleId      Int
+  productId   Int
+  quantity    Int
+  unitPrice   Decimal  @db.Decimal(10, 2)
+  totalPrice  Decimal  @db.Decimal(10, 2)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   userAt      Int
-  orderId     Int      @unique
-  order       Order    @relation(fields: [orderId], references: [id])
+
+  // Relaciones
+  sale        Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  product     Product  @relation(fields: [productId], references: [id])
 }
 
 model Stock {
   id            Int      @id @default(autoincrement())
   initialAmount Int
   currentAmount Int
-  date          DateTime @db.Date
   productId     Int      @unique
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -128,34 +203,48 @@ model Stock {
   product       Product  @relation(fields: [productId], references: [id])
 }
 
-model Supply {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  userAt    Int
+// ENUMS
+enum OrderStatus {
+  PENDING     // Pendiente
+  IN_PRODUCTION // En producción
+  READY       // Listo para entrega
+  DELIVERED   // Entregado
+  CANCELLED   // Cancelado
 }
 
-model DailyQuota {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  userAt    Int
+enum ProductionStatus {
+  PENDING     // Pendiente
+  IN_PROGRESS // En preparación
+  COMPLETED   // Completado
+  CANCELLED   // Cancelado
 }
 
-model DataSettings {
-  id         Int      @id @default(autoincrement())
-  table      String   @db.VarChar(50)
-  field      String   @db.VarChar(50)
-  properties String   @db.LongText
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  userAt     Int
+enum DeliveryStatus {
+  PENDING     // Pendiente
+  SCHEDULED   // Programado
+  IN_TRANSIT  // En camino
+  DELIVERED   // Entregado
+  CANCELLED   // Cancelado
+}
+
+enum PaymentMethod {
+  CASH        // Efectivo
+  CARD        // Tarjeta
+  TRANSFER    // Transferencia
+  DIGITAL     // Pago digital
+}
+
+enum PaymentStatus {
+  PENDING     // Pendiente
+  PAID        // Pagado
+  PARTIAL     // Pago parcial
+  CANCELLED   // Cancelado
 }
 
 enum JobRoles {
   MANAGER
-  ADMINISTRATOR
-  COOK
+  ADMIN
+  BAKER
   DELIVERY
   CASHIER
 }
@@ -164,13 +253,6 @@ enum Gender {
   MALE
   FEMALE
   OTHER
-}
-
-enum OrderState {
-  PENDING
-  IN_PROGRESS
-  COMPLETED
-  CANCELLED
 }
 
 enum State {

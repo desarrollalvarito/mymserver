@@ -1,13 +1,25 @@
 import { verifyToken } from "../helpers/token.helper.js"
+import { tokenBlacklist } from '../helpers/token-blacklist.helper.js'
 
-export const validateToken = (req, res, next) => {
+export const authenticateToken = (req, res, next) => {
+    const authHeader = req.headers.authorization
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'Token de acceso requerido' })
+    }
+
+    const token = authHeader.split(' ')[1]
+
+    // Verificar si el token está en la blacklist
+    if (tokenBlacklist.has(token)) {
+        return res.status(403).json({ error: 'Token revocado' })
+    }
+
     try {
-        const token = req.headers?.authorization
-        if (!token) throw new Error('Invalid authorization')
-        const payload = verifyToken(token)
+        const decoded = verifyToken(token)
+        req.user = decoded.payload
         next()
     } catch (error) {
-        console.log('Error ', error.message)
-        return res.status(401).json({ error: error.message })
+        return res.status(403).json({ error: 'Token inválido o expirado' })
     }
 }

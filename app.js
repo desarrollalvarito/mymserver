@@ -1,4 +1,5 @@
 import express from "express";
+import cookieParser from 'cookie-parser'
 import 'dotenv/config'
 import routerAuth from './routes/auth.route.js'
 import routerPerson from './routes/person.route.js'
@@ -12,6 +13,7 @@ import cors from 'cors'
 const app = express();
 app.use(cors())
 app.use(express.json())
+app.use(cookieParser())
 app.use('/api/auth', routerAuth)
 app.use('/api/person', routerPerson)
 app.use('/api/employee', routerEmployee)

@@ -28,7 +28,11 @@ const defineModel = Prisma.defineExtension({
                 }
                 else {
                     if (bycrypt.compareSync(password, user.password)) {
-                        return user
+                        return {
+                            id: user.id,
+                            username: user.username,
+                            email: user.email
+                        }
                     }
                 }
             },

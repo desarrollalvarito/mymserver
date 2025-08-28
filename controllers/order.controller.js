@@ -1,6 +1,7 @@
 import { prisma } from '../config/db.js'
 import { body } from 'express-validator'
 import { generateToken } from '../helpers/token.helper.js'
+import { employees } from '../prisma/dataseed.js'
 
 export const getProduct = async (req, res) => {
     const { id } = req.body
@@ -68,6 +69,25 @@ export const list = async (req, res) => {
                             }
                         },
                     }
+                },
+                delivery: {
+                    select: {
+                        id: true,
+                        status: true,
+                        driver: {
+                            select: {
+                                id: true,
+                                person: {
+                                    select: {
+                                        id: true,
+                                        run: true,
+                                        names: true,
+                                        lastName: true
+                                    }
+                                }
+                            }
+                        },
+                    }
                 }
             },
             orderBy: {
@@ -89,7 +109,7 @@ export const list = async (req, res) => {
 }
 
 export const add = async (req, res) => {
-    const { client, date, userAt, orderProduct } = req.body
+    const { client, date, userAt, orderProduct, delivery } = req.body
     try {
         let order = await prisma.order.create(
             {
@@ -104,6 +124,7 @@ export const add = async (req, res) => {
                                     productId: op.product.id,
                                     quantity: op.quantity,
                                     aditional: op.aditional,
+                                    unitPrice: op.product.price,
                                     userAt
                                 }))
                             ]
@@ -112,6 +133,15 @@ export const add = async (req, res) => {
                 }
             }
         )
+        if (delivery.driver.id) {
+            let deliveryCreate = await prisma.delivery.create({
+                data: {
+                    orderId: order.id,
+                    driverId: delivery.driver.id,
+                    userAt
+                }
+            })
+        }
         return res.send(order)
     } catch (error) {
         console.log(error)
@@ -119,7 +149,7 @@ export const add = async (req, res) => {
     }
 }
 export const modify = async (req, res) => {
-    const { id, clientId, date, state, userAt, orderProduct } = req.body
+    const { id, clientId, date, state, userAt, orderProduct, delivery } = req.body
     try {
         let order = await prisma.order.update(
             {
@@ -143,6 +173,7 @@ export const modify = async (req, res) => {
                             productId: op.product.id,
                             quantity: op.quantity,
                             aditional: op.aditional,
+                            unitPrice: op.product.price,
                             state: op.state,
                             userAt
                         }
@@ -154,11 +185,34 @@ export const modify = async (req, res) => {
                             orderId: order.id,
                             quantity: op.quantity,
                             aditional: op.aditional,
+                            unitPrice: op.product.price,
                             userAt
                         }
                     })
                 }
             })
+        }
+        if (delivery.driver.id) {
+            if (delivery.id) {
+                await prisma.delivery.update({
+                    where: {
+                        id: delivery.id
+                    },
+                    data: {
+                        driverId: delivery.driver.id,
+                        status: delivery.status,
+                        userAt
+                    }
+                })
+            }
+            else {
+                await prisma.delivery.create({
+                    data: {
+                        driverId: delivery.driver.id,
+                        userAt
+                    }
+                })
+            }
         }
         console.log(order);
         return res.send(order)
