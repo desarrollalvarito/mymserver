@@ -1,14 +1,13 @@
 import { prisma } from '../config/db.js'
 import { body } from 'express-validator'
 import { generateToken } from '../helpers/token.helper.js'
-import { employees } from '../prisma/dataseed.js'
 
 export const list = async (req, res) => {
     const { date } = req.body
     try {
         const searchDate = new Date(date);
-        console.log(searchDate, date);
-        let orders = await prisma.order.findMany({
+        console.log(date, searchDate);
+        let production = await prisma.production.findMany({
             where: {
                 date: {
                     equals: searchDate,
@@ -17,15 +16,27 @@ export const list = async (req, res) => {
             select: {
                 id: true,
                 date: true,
-                state: true,
+                cook: {
+                    select: {
+                        id: true,
+                        workShift: true,
+                        person: {
+                            select: {
+                                id: true,
+                                run: true,
+                                names: true,
+                                lastName: true,
+                                gender: true
+                            }
+                        }
+                    }
+                },
+                status: true,
                 userAt: true,
-                client: true,
-                orderProduct: {
+                productionProduct: {
                     select: {
                         id: true,
                         quantity: true,
-                        aditional: true,
-                        state: true,
                         product: {
                             select: {
                                 id: true,
@@ -35,39 +46,13 @@ export const list = async (req, res) => {
                         },
                     }
                 },
-                delivery: {
-                    select: {
-                        id: true,
-                        status: true,
-                        driver: {
-                            select: {
-                                id: true,
-                                person: {
-                                    select: {
-                                        id: true,
-                                        run: true,
-                                        names: true,
-                                        lastName: true
-                                    }
-                                }
-                            }
-                        },
-                    }
-                }
             },
             orderBy: {
                 createdAt: 'asc' // Ordena por fecha de creación
             }
         })
-        orders = orders.map(o => {
-            let quantity = o.orderProduct.reduce((acc, op) => op.state !== 'INACTIVE' ? acc + op.quantity : acc, 0);
-            return {
-                ...o,
-                quantity
-            }
-        })
-        console.log(orders);
-        return res.send(orders)
+        console.log(production);
+        return res.send(production)
     } catch (error) {
         console.log(error);
         return res.json({ error })
@@ -208,24 +193,23 @@ export const remove = async (req, res) => {
     }
 }
 
-export const totalOrders = async (req, res) => {
+export const totalProductions = async (req, res) => {
     const { date } = req.body
     try {
         const searchDate = new Date(date);
         console.log(searchDate, date);
-        let total = await prisma.orderProduct.groupBy({
+        let total = await prisma.productionProduct.groupBy({
             where: {
-                order: {
+                production: {
                     date: {
                         equals: searchDate,
                     },
                     AND: {
-                        state: {
+                        status: {
                             not: 'CANCELLED'
                         }
                     }
-                },
-                state: 'ACTIVE'
+                }
             },
             by: ['productId'],
             _sum: {
