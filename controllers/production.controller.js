@@ -193,12 +193,12 @@ export const remove = async (req, res) => {
     }
 }
 
-export const totalProductions = async (req, res) => {
+export const totalOrdersProductions = async (req, res) => {
     const { date } = req.body
     try {
         const searchDate = new Date(date);
         console.log(searchDate, date);
-        let total = await prisma.productionProduct.groupBy({
+        let productions = await prisma.productionProduct.groupBy({
             where: {
                 production: {
                     date: {
@@ -216,23 +216,118 @@ export const totalProductions = async (req, res) => {
                 quantity: true
             }
         })
+        console.log(productions);
+        let orders = await prisma.orderProduct.groupBy({
+            where: {
+                order: {
+                    date: {
+                        equals: searchDate,
+                    },
+                    AND: {
+                        state: {
+                            not: 'CANCELLED'
+                        }
+                    }
+                },
+                state: 'ACTIVE'
+            },
+            by: ['productId'],
+            _sum: {
+                quantity: true
+            }
+        })
+        console.log(orders);
         let products = await prisma.product.findMany({
             where: {
                 state: 'ACTIVE'
             },
             select: {
                 id: true,
-                name: true,
-                price: true
+                name: true
             }
         })
-
+        console.log(products);
         products.map((p) => {
-            p.total = total.find(t => t.productId === p.id)?._sum.quantity || 0
+            p.productions = productions.find(pro => pro.productId === p.id)?._sum.quantity || 0
+            p.orders = orders.find(o => o.productId === p.id)?._sum.quantity || 0
         })
         return res.send(products)
     } catch (error) {
         console.log(error);
         return res.json({ error })
     }
+}
+
+// Consultas para obtener total de órdenes y total de productos
+export const productionMetrics = async (req, res) => {
+    const { date } = req.body
+    console.log(date);
+    const whereClause = date ? {
+        date: {
+            gte: new Date(date + 'T00:00:00.000Z'),
+            lte: new Date(date + 'T23:59:59.999Z')
+        }
+    } : {}
+
+    console.log(whereClause);
+
+    // 1. TOTAL DE ÓRDENES DEL DÍA
+    const totalOrdenes = await prisma.order.count({
+        where: {
+            ...whereClause,
+            state: {
+                not: 'CANCELLED'
+            }
+        }
+    })
+
+    // 2. TOTAL DE PRODUCTOS SOLICITADOS EN ÓRDENES
+    const totalProductosSolicitados = await prisma.orderProduct.aggregate({
+        where: {
+            order: {
+                ...whereClause,
+                state: {
+                    not: 'CANCELLED'
+                }
+            },
+            state: 'ACTIVE'
+        },
+        _sum: {
+            quantity: true
+        }
+    })
+
+    // 3. TOTAL PRODUCTOS PROGRAMADOS EN PRODUCCIÓN (PENDING)
+    const totalProductosProgramados = await prisma.productionProduct.aggregate({
+        where: {
+            production: {
+                ...whereClause,
+                status: 'PENDING'
+            }
+        },
+        _sum: {
+            quantity: true
+        }
+    })
+
+    // 4. TOTAL PRODUCTOS EN PRODUCCIÓN (IN_PROGRESS)
+    const totalProductosEnProceso = await prisma.productionProduct.aggregate({
+        where: {
+            production: {
+                ...whereClause,
+                status: 'IN_PROGRESS'
+            }
+        },
+        _sum: {
+            quantity: true
+        }
+    })
+
+    return res.send({
+        totalOrdenes,
+        totalProductos: totalProductosSolicitados._sum.quantity || 0,
+        produccionProgramada: totalProductosProgramados._sum.quantity || 0,
+        produccionEnProceso: totalProductosEnProceso._sum.quantity || 0,
+        productosDisponibles: (totalProductosSolicitados._sum.quantity || 0) - (totalProductosProgramados._sum.quantity || 0)
+    })
 }
