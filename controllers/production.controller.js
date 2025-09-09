@@ -60,22 +60,20 @@ export const list = async (req, res) => {
 }
 
 export const add = async (req, res) => {
-    const { client, date, userAt, orderProduct, delivery } = req.body
+    const { date, cook, userAt, productionProduct } = req.body
     try {
-        let order = await prisma.order.create(
+        let production = await prisma.production.create(
             {
                 data: {
-                    clientId: client.id,
                     date,
+                    assignedTo: cook.id,
                     userAt,
-                    orderProduct: {
+                    productionProduct: {
                         createMany: {
                             data: [
-                                ...orderProduct.map(op => ({
-                                    productId: op.product.id,
-                                    quantity: op.quantity,
-                                    aditional: op.aditional,
-                                    unitPrice: op.product.price,
+                                ...productionProduct.map(pp => ({
+                                    productId: pp.product.id,
+                                    quantity: pp.quantity,
                                     userAt
                                 }))
                             ]
@@ -84,89 +82,56 @@ export const add = async (req, res) => {
                 }
             }
         )
-        if (delivery.driver.id) {
-            let deliveryCreate = await prisma.delivery.create({
-                data: {
-                    orderId: order.id,
-                    driverId: delivery.driver.id,
-                    userAt
-                }
-            })
-        }
-        return res.send(order)
+        return res.send(production)
     } catch (error) {
         console.log(error)
         return res.json({ error })
     }
 }
 export const modify = async (req, res) => {
-    const { id, clientId, date, state, userAt, orderProduct, delivery } = req.body
+    console.log("modificando production");
+    const { id, date, cook, status, userAt, productionProduct } = req.body
     try {
-        let order = await prisma.order.update(
+        let production = await prisma.production.update(
             {
                 where: {
                     id
                 },
                 data: {
-                    clientId,
                     date,
-                    state,
+                    assignedTo: cook.id,
+                    status,
                     userAt
                 }
             }
         )
-        if (orderProduct && Array.isArray(orderProduct)) {
-            orderProduct.map(async (op) => {
+        if (productionProduct && Array.isArray(productionProduct)) {
+            console.log("production", productionProduct);
+            productionProduct.map(async (op) => {
+                console.log("op", op);
                 if (op.id) {
-                    await prisma.orderProduct.update({
+                    await prisma.productionProduct.update({
                         where: { id: op.id },
                         data: {
                             productId: op.product.id,
                             quantity: op.quantity,
-                            aditional: op.aditional,
-                            unitPrice: op.product.price,
-                            state: op.state,
                             userAt
                         }
                     })
                 } else {
-                    await prisma.orderProduct.create({
+                    await prisma.productionProduct.create({
                         data: {
+                            productionId: production.id,
                             productId: op.product.id,
-                            orderId: order.id,
                             quantity: op.quantity,
-                            aditional: op.aditional,
-                            unitPrice: op.product.price,
                             userAt
                         }
                     })
                 }
             })
         }
-        if (delivery.driver.id) {
-            if (delivery.id) {
-                await prisma.delivery.update({
-                    where: {
-                        id: delivery.id
-                    },
-                    data: {
-                        driverId: delivery.driver.id,
-                        status: delivery.status,
-                        userAt
-                    }
-                })
-            }
-            else {
-                await prisma.delivery.create({
-                    data: {
-                        driverId: delivery.driver.id,
-                        userAt
-                    }
-                })
-            }
-        }
-        console.log(order);
-        return res.send(order)
+        console.log(production);
+        return res.send(production)
     } catch (error) {
         return res.json({ error })
     }
@@ -175,18 +140,18 @@ export const remove = async (req, res) => {
     const { id } = req.body
     console.log(id);
     try {
-        let order = await prisma.order.update(
+        let production = await prisma.production.update(
             {
                 where: {
                     id
                 },
                 data: {
-                    state: 'CANCELLED',
+                    status: 'CANCELLED',
                 }
             }
         )
-        console.log(order);
-        return res.send(order)
+        console.log(production);
+        return res.send(production)
     } catch (error) {
         console.log(error);
         return res.json({ error })
