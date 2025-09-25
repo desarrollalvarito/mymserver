@@ -1,6 +1,6 @@
 import "dotenv/config";
 import jwt from "jsonwebtoken";
-import { tokenBlacklist } from "./token-blacklist.helper";
+import { tokenBlacklist } from "./token-blacklist.helper.js";
 
 import type { Secret } from "jsonwebtoken";
 

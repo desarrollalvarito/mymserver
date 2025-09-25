@@ -1,5 +1,5 @@
-import { ProductRepository } from '../../repositories/v1/product.repository';
-import { IProduct, IProductCreate, IProductUpdate, IProductService } from '../../interfaces/v1/IProduct';
+import { ProductRepository } from '../../repositories/v1/product.repository.js';
+import { IProduct, IProductCreate, IProductUpdate, IProductService } from '../../interfaces/v1/IProduct.js';
 
 export class ProductService implements IProductService {
   private productRepository: ProductRepository;
@@ -23,7 +23,8 @@ export class ProductService implements IProductService {
         throw new Error('El nombre del producto es requerido');
       }
 
-      if (productData.price <= 0) {
+      const priceNum = Number(productData.price);
+      if (!isFinite(priceNum) || priceNum <= 0) {
         throw new Error('El precio debe ser mayor a 0');
       }
 
@@ -48,8 +49,11 @@ export class ProductService implements IProductService {
         throw new Error('El nombre del producto no puede estar vacío');
       }
 
-      if (updateData.price !== undefined && updateData.price <= 0) {
-        throw new Error('El precio debe ser mayor a 0');
+      if (updateData.price !== undefined) {
+        const priceNum = Number(updateData.price);
+        if (!isFinite(priceNum) || priceNum <= 0) {
+          throw new Error('El precio debe ser mayor a 0');
+        }
       }
 
       return await this.productRepository.update(productData);

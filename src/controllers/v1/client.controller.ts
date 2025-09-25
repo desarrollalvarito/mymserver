@@ -1,9 +1,11 @@
 import { Request, Response } from 'express';
-import { body, ValidationChain } from 'express-validator';
-import { ClientRepository } from '../../repositories/v1/client.repository';
-import { ClientService } from '../../services/v1/client.service';
-import { prisma } from '../../lib/database';
-import { IClientCreate, IClientUpdate } from '../../interfaces/v1/IClient';
+import { body } from 'express-validator';
+import { ClientRepository } from '../../repositories/v1/client.repository.js';
+import { ClientService } from '../../services/v1/client.service.js';
+
+type ValidationChain = ReturnType<typeof body>;
+import { prisma } from '../../lib/database.js';
+import { IClientCreate, IClientUpdate } from '../../interfaces/v1/IClient.js';
 
 // DI: repo + service
 const clientRepository = new ClientRepository(prisma);

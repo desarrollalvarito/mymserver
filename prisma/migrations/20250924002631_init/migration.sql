@@ -162,16 +162,21 @@ CREATE TABLE `ProductionProduct` (
 -- CreateTable
 CREATE TABLE `Sale` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `orderId` INTEGER NOT NULL,
     `date` DATE NOT NULL,
-    `partialAmount` DECIMAL(10, 0) NOT NULL,
-    `discount` DECIMAL(10, 0) NOT NULL,
-    `totalAmount` DECIMAL(10, 0) NOT NULL,
-    `paymentMethod` ENUM('CASH', 'CARD', 'TRANSFER', 'DIGITAL') NOT NULL DEFAULT 'CASH',
-    `paymentStatus` ENUM('PENDING', 'PAID', 'PARTIAL', 'CANCELLED') NOT NULL DEFAULT 'PENDING',
+    `subtotal` DECIMAL(10, 2) NOT NULL,
+    `discount` DECIMAL(10, 2) NOT NULL,
+    `tax` DECIMAL(10, 2) NOT NULL,
+    `totalAmount` DECIMAL(10, 2) NOT NULL,
+    `amountPaid` DECIMAL(10, 2) NOT NULL,
+    `balance` DECIMAL(10, 2) NOT NULL,
+    `paymentStatus` ENUM('PENDING', 'PAID', 'PARTIAL', 'CANCELLED', 'REFUNDED') NOT NULL DEFAULT 'PENDING',
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
     `userAt` INTEGER NOT NULL,
 
+    UNIQUE INDEX `Sale_orderId_key`(`orderId`),
+    INDEX `Sale_date_idx`(`date`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -187,6 +192,23 @@ CREATE TABLE `SaleItem` (
     `updatedAt` DATETIME(3) NOT NULL,
     `userAt` INTEGER NOT NULL,
 
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Payment` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `saleId` INTEGER NOT NULL,
+    `amount` DECIMAL(10, 2) NOT NULL,
+    `paymentMethod` ENUM('CASH', 'CARD', 'TRANSFER', 'DIGITAL') NOT NULL,
+    `reference` VARCHAR(100) NULL,
+    `notes` VARCHAR(500) NULL,
+    `status` ENUM('PENDING', 'PAID', 'PARTIAL', 'CANCELLED', 'REFUNDED') NOT NULL DEFAULT 'PENDING',
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+    `userAt` INTEGER NOT NULL,
+
+    INDEX `Payment_saleId_idx`(`saleId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -238,10 +260,16 @@ ALTER TABLE `ProductionProduct` ADD CONSTRAINT `ProductionProduct_productionId_f
 ALTER TABLE `ProductionProduct` ADD CONSTRAINT `ProductionProduct_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `Product`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `Sale` ADD CONSTRAINT `Sale_orderId_fkey` FOREIGN KEY (`orderId`) REFERENCES `Order`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `SaleItem` ADD CONSTRAINT `SaleItem_saleId_fkey` FOREIGN KEY (`saleId`) REFERENCES `Sale`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `SaleItem` ADD CONSTRAINT `SaleItem_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `Product`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Payment` ADD CONSTRAINT `Payment_saleId_fkey` FOREIGN KEY (`saleId`) REFERENCES `Sale`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Stock` ADD CONSTRAINT `Stock_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `Product`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

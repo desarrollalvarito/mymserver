@@ -1,5 +1,5 @@
-import { EmployeeRepository } from '../../repositories/v1/employee.repository';
-import { IEmployee, IEmployeeCreate, IEmployeeService, IEmployeeUpdate } from '../../interfaces/v1/IEmployee';
+import { EmployeeRepository } from '../../repositories/v1/employee.repository.js';
+import { IEmployee, IEmployeeCreate, IEmployeeService, IEmployeeUpdate } from '../../interfaces/v1/IEmployee.js';
 
 export class EmployeeService implements IEmployeeService {
   constructor(private repo: EmployeeRepository) {}

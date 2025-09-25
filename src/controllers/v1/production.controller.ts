@@ -1,10 +1,12 @@
 import { Request, Response } from 'express';
-import { body, ValidationChain } from 'express-validator';
-import { prisma } from '../../lib/database';
-import { ProductionRepository } from '../../repositories/v1/production.repository';
-import { ProductionService } from '../../services/v1/production.service';
-import { IProductionCreate, IProductionUpdate } from '../../interfaces/v1/IProduction';
+import { body } from 'express-validator';
+import { prisma } from '../../lib/database.js';
+import { ProductionRepository } from '../../repositories/v1/production.repository.js';
+import { ProductionService } from '../../services/v1/production.service.js';
+import { IProductionCreate, IProductionUpdate } from '../../interfaces/v1/IProduction.js';
 import { ProductionStatus } from '@prisma/client';
+
+type ValidationChain = ReturnType<typeof body>;
 
 const repo = new ProductionRepository(prisma);
 const service = new ProductionService(repo, prisma);

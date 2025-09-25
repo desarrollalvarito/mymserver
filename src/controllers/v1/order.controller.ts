@@ -1,10 +1,12 @@
 import { Request, Response } from 'express';
-import { body, ValidationChain } from 'express-validator';
-import { prisma } from '../../lib/database';
+import { body } from 'express-validator';
+import { prisma } from '../../lib/database.js';
 import { OrderStatus } from '@prisma/client';
-import { OrderRepository } from '../../repositories/v1/order.repository';
-import { OrderService } from '../../services/v1/order.service';
-import { IOrderCreate, IOrderUpdate } from '../../interfaces/v1/IOrder';
+
+type ValidationChain = ReturnType<typeof body>;
+import { OrderRepository } from '../../repositories/v1/order.repository.js';
+import { OrderService } from '../../services/v1/order.service.js';
+import { IOrderCreate, IOrderUpdate } from '../../interfaces/v1/IOrder.js';
 
 const orderRepository = new OrderRepository(prisma);
 const orderService = new OrderService(orderRepository, prisma);
@@ -72,7 +74,6 @@ export class OrderController {
           body('orderProduct').isArray({ min: 1 }).withMessage('orderProduct debe tener al menos 1 item'),
           body('orderProduct.*.product.id').exists().withMessage('product.id es requerido').isInt({ min: 1 }),
           body('orderProduct.*.quantity').exists().withMessage('quantity es requerido').isInt({ min: 1 }),
-          body('orderProduct.*.aditional').optional().isBoolean().withMessage('aditional debe ser boolean'),
         ];
       case 'modify':
         return [
@@ -82,12 +83,11 @@ export class OrderController {
           body('state').optional().isIn(Object.values(OrderStatus)),
           body('userAt').optional().isInt({ min: 1 }),
           body('orderProduct').optional().isArray(),
-          body('orderProduct.*.id').optional().isInt({ min: 1 }),
+          body('orderProduct.*.id').optional().isInt({ min: 0 }),
           body('orderProduct.*.product.id').optional().isInt({ min: 1 }),
           body('orderProduct.*.quantity').optional().isInt({ min: 1 }),
-          body('orderProduct.*.aditional').optional().isBoolean(),
-          body('delivery.id').optional().isInt({ min: 1 }),
-          body('delivery.driver.id').optional().isInt({ min: 1 }),
+          body('delivery.id').optional().isInt({ min: 0 }),
+          body('delivery.driver.id').optional().isInt({ min: 0 }),
         ];
       case 'remove':
         return [body('id').exists().withMessage('id es requerido').isInt({ min: 1 })];

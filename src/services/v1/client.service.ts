@@ -1,5 +1,5 @@
-import { ClientRepository } from '../../repositories/v1/client.repository';
-import { IClient, IClientCreate, IClientService, IClientUpdate } from '../../interfaces/v1/IClient';
+import { ClientRepository } from '../../repositories/v1/client.repository.js';
+import { IClient, IClientCreate, IClientService, IClientUpdate } from '../../interfaces/v1/IClient.js';
 
 export class ClientService implements IClientService {
   private clientRepository: ClientRepository;

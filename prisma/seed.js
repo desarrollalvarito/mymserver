@@ -164,7 +164,6 @@ async function seedOrders() {
                     create: orderProduct.map(op => ({
                         productId: op.productId,
                         quantity: op.quantity,
-                        aditional: op.aditional || false,
                         unitPrice: op.unitPrice || 0,
                         userAt: 1
                     }))

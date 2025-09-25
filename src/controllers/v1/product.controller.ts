@@ -1,9 +1,11 @@
 import { Request, Response } from 'express';
-import { body, ValidationChain } from 'express-validator';
-import { ProductService } from '../../services/v1/product.service';
-import { ProductRepository } from '../../repositories/v1/product.repository';
-import { prisma } from '../../lib/database';
-import { IProductCreate, IProductUpdate } from '../../interfaces/v1/IProduct';
+import { body } from 'express-validator';
+import { ProductService } from '../../services/v1/product.service.js';
+import { ProductRepository } from '../../repositories/v1/product.repository.js';
+
+type ValidationChain = ReturnType<typeof body>;
+import { prisma } from '../../lib/database.js';
+import { IProductCreate, IProductUpdate } from '../../interfaces/v1/IProduct.js';
 
 // Inicializar dependencias
 const productRepository = new ProductRepository(prisma);

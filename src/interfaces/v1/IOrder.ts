@@ -4,7 +4,6 @@ export interface IOrderProductInput {
   id?: number; // para modify
   product: { id: number; price?: any };
   quantity: number;
-  aditional?: boolean;
   state?: State;
 }
 

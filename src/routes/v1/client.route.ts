@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { ClientController } from '../../controllers/v1/client.controller';
-import { validationResultExpress } from '../../middlewares/validationResult';
-import { authenticateToken } from '../../middlewares/auth.middleware';
+import { ClientController } from '../../controllers/v1/client.controller.js';
+import { validationResultExpress } from '../../middlewares/validationResult.js';
+import { authenticateToken } from '../../middlewares/auth.middleware.js';
 
 const router = Router();
 

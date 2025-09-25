@@ -1,4 +1,4 @@
-import { ILoginCredentials, IUserSession, IUserCreate, IUserUpdate } from './IUser';
+import { ILoginCredentials, IUserSession, IUserCreate, IUserUpdate } from './IUser.js';
 
 export interface TokenPayload {
   id: number;

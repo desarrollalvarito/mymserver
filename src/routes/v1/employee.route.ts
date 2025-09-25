@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { EmployeeController } from '../../controllers/v1/employee.controller';
-import { validationResultExpress } from '../../middlewares/validationResult';
-import { authenticateToken } from '../../middlewares/auth.middleware';
+import { EmployeeController } from '../../controllers/v1/employee.controller.js';
+import { validationResultExpress } from '../../middlewares/validationResult.js';
+import { authenticateToken } from '../../middlewares/auth.middleware.js';
 
 const router = Router();
 

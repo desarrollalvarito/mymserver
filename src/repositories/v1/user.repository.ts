@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { IUser, IUserSession, IUserCreate, IUserUpdate } from '../../interfaces/v1/IUser';
+import { IUser, IUserSession, IUserCreate, IUserUpdate } from '../../interfaces/v1/IUser.js';
 
 export class UserRepository {
   private prisma: PrismaClient;

@@ -1,10 +1,12 @@
 import { Request, Response } from 'express';
-import { body, ValidationChain } from 'express-validator';
-import { AuthService } from '../../services/v1/auth.service';
-import { UserRepository } from '../../repositories/v1/user.repository';
-import { TokenService } from '../../services/v1/token.service';
-import { prisma } from '../../lib/database';
-import { ILoginCredentials } from '../../interfaces/v1/IUser';
+import { body } from 'express-validator';
+import { AuthService } from '../../services/v1/auth.service.js';
+import { UserRepository } from '../../repositories/v1/user.repository.js';
+
+type ValidationChain = ReturnType<typeof body>;
+import { TokenService } from '../../services/v1/token.service.js';
+import { prisma } from '../../lib/database.js';
+import { ILoginCredentials } from '../../interfaces/v1/IUser.js';
 
 // Inicializar dependencias
 const userRepository = new UserRepository(prisma);

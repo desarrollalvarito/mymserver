@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
-import { tokenBlacklist } from '../../helpers/token-blacklist.helper';
-import { TokenPayload } from '../../interfaces/v1/IAuthService';
+import { tokenBlacklist } from '../../helpers/token-blacklist.helper.js';
+import { TokenPayload } from '../../interfaces/v1/IAuthService.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'secret_refresh';
@@ -11,7 +11,7 @@ export class TokenService {
   }
 
   generateRefreshToken(payload: { id: number }): string {
-    return jwt.sign(payload, JWT_REFRESH_SECRET, { expiresIn: '12h' });
+    return jwt.sign(payload, JWT_REFRESH_SECRET, { expiresIn: '3h' });
   }
 
   verifyToken(token: string): TokenPayload {

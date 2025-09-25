@@ -1,7 +1,10 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, OrderStatus, ProductionStatus, State } from '@prisma/client';
 
 export class ProductionRepository {
-  constructor(private prisma: PrismaClient) {}
+  private prisma: PrismaClient;
+  constructor(prisma: PrismaClient) {
+    this.prisma = prisma;
+  }
 
   findByDate(date: Date) {
     return this.prisma.production.findMany({
@@ -30,6 +33,11 @@ export class ProductionRepository {
     });
   }
 
+  async exists(id: number): Promise<boolean> {
+    const item = await this.prisma.production.findUnique({ where: { id }, select: { id: true } });
+    return !!item;
+  }
+
   create(data: any) {
     return this.prisma.production.create({ data });
   }
@@ -39,7 +47,7 @@ export class ProductionRepository {
   }
 
   cancel(id: number) {
-    return this.prisma.production.update({ where: { id }, data: { status: 'CANCELLED' } });
+    return this.prisma.production.update({ where: { id }, data: { status: ProductionStatus.CANCELLED } });
   }
 
   createProductionProduct(data: any) {
@@ -52,7 +60,7 @@ export class ProductionRepository {
 
   groupProductionsByProduct(date: Date) {
     return this.prisma.productionProduct.groupBy({
-      where: { production: { date: { equals: date }, AND: { status: { not: 'CANCELLED' } } } },
+      where: { production: { date: { equals: date }, AND: { status: { not: ProductionStatus.CANCELLED } } } },
       by: ['productId'],
       _sum: { quantity: true },
     });
@@ -60,14 +68,14 @@ export class ProductionRepository {
 
   groupOrdersByProduct(date: Date) {
     return this.prisma.orderProduct.groupBy({
-      where: { order: { date: { equals: date }, AND: { state: { not: 'CANCELLED' } } }, state: 'ACTIVE' },
+      where: { order: { date: { equals: date }, AND: { state: { not: OrderStatus.CANCELLED } } }, state: State.ACTIVE },
       by: ['productId'],
       _sum: { quantity: true },
     });
   }
 
   activeProducts() {
-    return this.prisma.product.findMany({ where: { state: 'ACTIVE' }, select: { id: true, name: true } });
+    return this.prisma.product.findMany({ where: { state: State.ACTIVE }, select: { id: true, name: true } });
   }
 
   countOrders(where: any) {

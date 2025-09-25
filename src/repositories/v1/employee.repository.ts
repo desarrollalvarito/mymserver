@@ -1,5 +1,5 @@
 import { PrismaClient, State } from '@prisma/client';
-import { IEmployee, IEmployeeCreate, IEmployeeUpdate } from '../../interfaces/v1/IEmployee';
+import { IEmployee, IEmployeeCreate, IEmployeeUpdate } from '../../interfaces/v1/IEmployee.js';
 
 export class EmployeeRepository {
   constructor(private prisma: PrismaClient) {}

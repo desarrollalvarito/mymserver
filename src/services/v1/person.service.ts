@@ -1,6 +1,6 @@
 import { Gender, PrismaClient } from '@prisma/client';
-import { PersonRepository } from '../../repositories/v1/person.repository';
-import { IPerson, IPersonCreate, IPersonService, IPersonUpdate } from '../../interfaces/v1/IPerson';
+import { PersonRepository } from '../../repositories/v1/person.repository.js';
+import { IPerson, IPersonCreate, IPersonService, IPersonUpdate } from '../../interfaces/v1/IPerson.js';
 
 export class PersonService implements IPersonService {
   constructor(private repo: PersonRepository) {}
@@ -41,7 +41,7 @@ export class PersonService implements IPersonService {
       };
 
       // Validar fecha si viene
-      if (payload.birthdate && isNaN(payload.birthdate.getTime())) {
+      if (payload.birthdate instanceof Date && isNaN(payload.birthdate.getTime())) {
         throw new Error('birthdate inválida');
       }
 

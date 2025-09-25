@@ -1,9 +1,11 @@
 import { Request, Response } from 'express';
-import { body, ValidationChain } from 'express-validator';
-import { prisma } from '../../lib/database';
-import { PersonRepository } from '../../repositories/v1/person.repository';
-import { PersonService } from '../../services/v1/person.service';
-import { IPersonCreate, IPersonUpdate } from '../../interfaces/v1/IPerson';
+import { body } from 'express-validator';
+import { prisma } from '../../lib/database.js';
+import { PersonRepository } from '../../repositories/v1/person.repository.js';
+
+type ValidationChain = ReturnType<typeof body>;
+import { PersonService } from '../../services/v1/person.service.js';
+import { IPersonCreate, IPersonUpdate } from '../../interfaces/v1/IPerson.js';
 import { Gender } from '@prisma/client';
 
 // Inicializar dependencias

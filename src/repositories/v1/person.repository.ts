@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { IPerson, IPersonCreate, IPersonUpdate } from '../../interfaces/v1/IPerson';
+import { IPerson, IPersonCreate, IPersonUpdate } from '../../interfaces/v1/IPerson.js';
 
 export class PersonRepository {
   private prisma: PrismaClient;

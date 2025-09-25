@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { IClient, IClientCreate, IClientUpdate } from '../../interfaces/v1/IClient';
+import { IClient, IClientCreate, IClientUpdate } from '../../interfaces/v1/IClient.js';
 
 export class ClientRepository {
   private prisma: PrismaClient;

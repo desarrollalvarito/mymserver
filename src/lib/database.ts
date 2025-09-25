@@ -4,11 +4,12 @@ import bcrypt from 'bcryptjs';
 const defineQuery = Prisma.defineExtension({
   query: {
     user: {
-      async $allOperations({ model, operation, args, query }) {
-        if (['create', 'update'].includes(operation) && args.data && 'password' in args.data) {
-          const password = (args.data as any).password;
-          if (password) {
-            (args.data as any).password = bcrypt.hashSync(password, 10);
+      async $allOperations({ operation, args, query }) {
+        // Sólo interceptar create/update donde existe data
+        if ((operation === 'create' || operation === 'update') && (args as any)?.data) {
+          const data = (args as any).data;
+          if ('password' in data && data.password) {
+            data.password = bcrypt.hashSync(data.password, 10);
           }
         }
         return query(args);
@@ -48,4 +49,5 @@ const defineModel = Prisma.defineExtension({
   },
 });
 
-export const prisma = new PrismaClient().$extends(defineModel).$extends(defineQuery);
+// Export as PrismaClient type to satisfy repositories' constructors
+export const prisma: PrismaClient = (new PrismaClient().$extends(defineModel).$extends(defineQuery) as unknown) as PrismaClient;

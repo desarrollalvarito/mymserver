@@ -1,5 +1,5 @@
 import { PrismaClient, State } from '@prisma/client';
-import { IProduct, IProductCreate, IProductUpdate } from '../../interfaces/v1/IProduct';
+import { IProduct, IProductCreate, IProductUpdate } from '../../interfaces/v1/IProduct.js';
 
 export class ProductRepository {
   private prisma: PrismaClient;
@@ -11,7 +11,7 @@ export class ProductRepository {
   async findAll(): Promise<IProduct[]> {
     return this.prisma.product.findMany({
       where: {
-        state: 'ACTIVE',
+        state: State.ACTIVE,
       },
       orderBy: { createdAt: 'desc' }
     });

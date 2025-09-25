@@ -1,10 +1,12 @@
 import { Request, Response } from 'express';
-import { body, ValidationChain } from 'express-validator';
+import { body } from 'express-validator';
 import { JobRoles, State } from '@prisma/client';
-import { prisma } from '../../lib/database';
-import { EmployeeRepository } from '../../repositories/v1/employee.repository';
-import { EmployeeService } from '../../services/v1/employee.service';
-import { IEmployeeCreate, IEmployeeUpdate } from '../../interfaces/v1/IEmployee';
+import { prisma } from '../../lib/database.js';
+
+type ValidationChain = ReturnType<typeof body>;
+import { EmployeeRepository } from '../../repositories/v1/employee.repository.js';
+import { EmployeeService } from '../../services/v1/employee.service.js';
+import { IEmployeeCreate, IEmployeeUpdate } from '../../interfaces/v1/IEmployee.js';
 
 // DI
 const repo = new EmployeeRepository(prisma);

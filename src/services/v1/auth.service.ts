@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
-import { UserRepository } from '../../repositories/v1/user.repository';
-import { TokenService } from './token.service';
+import { UserRepository } from '../../repositories/v1/user.repository.js';
+import { TokenService } from './token.service.js';
 import { 
   ILoginCredentials, 
   IUserSession, 

@@ -90,8 +90,10 @@ model Order {
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   userAt       Int
+  // Relaciones
   client       Client         @relation(fields: [clientId], references: [id])
   delivery     Delivery?
+  sale         Sale?
   orderProduct OrderProduct[]
 
   @@index([clientId], map: "Order_clientId_fkey")
@@ -103,7 +105,6 @@ model OrderProduct {
   orderId           Int
   quantity          Int
   unitPrice         Decimal  @db.Decimal(10, 2)
-  aditional         Boolean  @default(false)
   state             State    @default(ACTIVE)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
@@ -165,16 +166,24 @@ model ProductionProduct {
 
 model Sale {
   id            Int           @id @default(autoincrement())
+  orderId       Int           @unique
   date          DateTime      @db.Date
-  partialAmount Decimal       @db.Decimal(10, 0)
-  discount      Decimal       @db.Decimal(10, 0)
-  totalAmount   Decimal       @db.Decimal(10, 0)
-  paymentMethod PaymentMethod @default(CASH)
+  subtotal      Decimal       @db.Decimal(10, 2)
+  discount      Decimal       @db.Decimal(10, 2)
+  tax           Decimal       @db.Decimal(10, 2)
+  totalAmount   Decimal       @db.Decimal(10, 2)
+  amountPaid    Decimal       @db.Decimal(10, 2)
+  balance       Decimal       @db.Decimal(10, 2)
   paymentStatus PaymentStatus @default(PENDING)
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
   userAt        Int
-  saleItem      SaleItem[]
+
+  order         Order?         @relation(fields: [orderId], references: [id])
+  saleItems     SaleItem[]
+  payments      Payment[]     // Relación con pagos
+  
+  @@index([date])
 }
 
 model SaleItem {
@@ -191,6 +200,24 @@ model SaleItem {
   // Relaciones
   sale        Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
   product     Product  @relation(fields: [productId], references: [id])
+}
+
+model Payment {
+  id            Int           @id @default(autoincrement())
+  saleId        Int
+  amount        Decimal       @db.Decimal(10, 2)
+  paymentMethod PaymentMethod
+  reference     String?       @db.VarChar(100) // Referencia de transferencia, último 4 dígitos de tarjeta, etc.
+  notes         String?       @db.VarChar(500)
+  status        PaymentStatus @default(PENDING)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  userAt        Int
+  
+  // Relaciones
+  sale          Sale          @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  
+  @@index([saleId])
 }
 
 model Stock {
@@ -237,9 +264,10 @@ enum PaymentMethod {
 
 enum PaymentStatus {
   PENDING     // Pendiente
-  PAID        // Pagado
+  PAID        // Pagado completamente
   PARTIAL     // Pago parcial
   CANCELLED   // Cancelado
+  REFUNDED    // Reembolsado
 }
 
 enum JobRoles {

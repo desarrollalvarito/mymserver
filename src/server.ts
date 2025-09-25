@@ -2,9 +2,9 @@ import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
-import { prisma } from "./lib/prisma";
-import apiRoutes from "./routes/index";
-import { versionMiddleware } from "./middlewares/versionMiddleware";
+import { prisma } from "./lib/database.js";
+import apiRoutes from "./routes/index.js";
+import { versionMiddleware } from "./middlewares/versionMiddleware.js";
 
 // Configuración de variables de entorno
 dotenv.config();

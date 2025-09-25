@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { TokenService } from "../services/v1/token.service";
-import { tokenBlacklist } from '../helpers/token-blacklist.helper';
+import { TokenService } from "../services/v1/token.service.js";
+import { tokenBlacklist } from '../helpers/token-blacklist.helper.js';
 
 const tokenService = new TokenService();
 
