@@ -5,7 +5,7 @@
   "main": "dist/server.js",
   "type": "module",
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "dev": "nodemon --watch src --ext ts,json --exec \"node --loader ts-node/esm --no-warnings --inspect src/server.ts\"",
     "build": "tsc",
     "start": "npm run generate && npm run build && node dist/server.js",
     "generate": "prisma generate",
